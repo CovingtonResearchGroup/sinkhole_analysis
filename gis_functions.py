@@ -16,6 +16,7 @@ def clip_raster_to_geometry(
 
     ras_src = rio.open(os.path.join(rasterdir, rasterfile))
     # ras_img = ras_src.read()
+
     ras_crs = ras_src.crs
     # convert clip geometry to raster crs
     geom_df = geom_df.to_crs(ras_crs)
@@ -39,7 +40,7 @@ def clip_raster_to_geometry(
 
 
 def clip_shp_to_geometry(
-    clipname="Clip-", shpdir="", shpfile="", outdir="./", geom_df=None
+    clipname="Clip-", shpdir="", shpfile="", outdir="./", geom_df=None, outcrs=None
 ):
     gdf = gpd.read_file(os.path.join(shpdir, shpfile))
     geom_crs = geom_df.crs
@@ -47,5 +48,7 @@ def clip_shp_to_geometry(
     # geom_df = geom_df.to_crs(shpcrs)
     gdf = gdf.to_crs(geom_crs)
     gdf = gdf[gdf.within(geom_df.iloc[0].geometry)]
+    if not outcrs is None:
+        gdf = gdf.to_crs(outcrs)
     gdf.to_file(os.path.join(outdir, clipname + shpfile))
     return gdf
