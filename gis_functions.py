@@ -16,7 +16,8 @@ def clip_raster_to_geometry(
 
     ras_src = rio.open(os.path.join(rasterdir, rasterfile))
     # ras_img = ras_src.read()
-
+    # Make sure rasterfile ends in tif for output
+    rasterfile = rasterfile[:-3] + "tif"
     ras_crs = ras_src.crs
     # convert clip geometry to raster crs
     geom_df = geom_df.to_crs(ras_crs)

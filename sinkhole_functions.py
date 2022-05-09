@@ -10,7 +10,9 @@ def rasterize_sinks_shp(shpfile, outfile, basefile):
     wbt.vector_polygons_to_raster(shpfile, outfile, base=basefile)
 
 
-def calc_karst_fraction(datadir, demfile, sinksfile=None):
+def calc_karst_fraction(
+    datadir, demfile, sinksfile=None, fill_pits=True, mean_filter=True
+):
     basefilename = demfile.split(".")[0]
 
     # Define filenames
@@ -21,10 +23,17 @@ def calc_karst_fraction(datadir, demfile, sinksfile=None):
     d8path = os.path.join(datadir, basefilename + "-d8.tif")
     watershedspath = os.path.join(datadir, basefilename + "-wat.tif")
 
-    # Smooth dem
-    wbt.mean_filter(dempath, smoothed_dempath, 5, 5)
-    # Fill single-cell pits
-    wbt.fill_single_cell_pits(smoothed_dempath, pitfill_dempath)
+    if mean_filter:
+        # Smooth dem
+        wbt.mean_filter(dempath, smoothed_dempath, 5, 5)
+    else:
+        smoothed_dempath = dempath
+
+    if fill_pits:
+        # Fill single-cell pits
+        wbt.fill_single_cell_pits(smoothed_dempath, pitfill_dempath)
+    else:
+        pitfill_dempath = smoothed_dempath
 
     # Find sinks
     if sinksfile is None:
@@ -38,7 +47,7 @@ def calc_karst_fraction(datadir, demfile, sinksfile=None):
         rasterize_sinks_shp(sinksfile, sinkspath, dempath)
 
     # Calculate d8 flow direction
-    wbt.d8_pointer(smoothed_dempath, d8path)
+    wbt.d8_pointer(pitfill_dempath, d8path)
     # Find watersheds of sinks
     wbt.watershed(d8path, sinkspath, watershedspath)
     wat_src = rio.open(watershedspath)
