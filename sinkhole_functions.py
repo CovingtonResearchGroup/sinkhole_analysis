@@ -53,7 +53,12 @@ def calc_karst_fraction(
     wat_src = rio.open(watershedspath)
     wat = wat_src.read()
     nkarst = len(wat[wat > 0])
-    nfluvial = len(wat[wat < 0])
+    dem_src = rio.open(dempath)
+    wat_elev = dem_src.read()
+    ndv = dem_src.nodata
+    ntotal = len(wat_elev[wat_elev != ndv])
+    # nfluvial = len(wat[wat < 0])
+    nfluvial = ntotal - nkarst
     print("n karst draining pixels =", nkarst)
     print("n fluvial draining pixels =", nfluvial)
     print("percent karst =", nkarst / (nkarst + nfluvial))
