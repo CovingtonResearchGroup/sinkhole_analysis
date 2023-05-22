@@ -61,5 +61,6 @@ def calc_karst_fraction(
     nfluvial = ntotal - nkarst
     print("n karst draining pixels =", nkarst)
     print("n fluvial draining pixels =", nfluvial)
-    print("percent karst =", nkarst / (nkarst + nfluvial))
-    return wat
+    p_karst = nkarst / (nkarst + nfluvial)
+    print("percent karst =", p_karst)
+    return p_karst

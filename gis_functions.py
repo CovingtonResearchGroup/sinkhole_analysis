@@ -22,8 +22,9 @@ def clip_raster_to_geometry(
     # convert clip geometry to raster crs
     geom_df = geom_df.to_crs(ras_crs)
     # Clip raster
+    print(type(geom_df))
     out_image, out_transform = mask.mask(
-        ras_src, [geom_df.iloc[0].geometry], crop=True, nodata=nodata
+        ras_src, [geom_df.geometry], crop=True, nodata=nodata
     )
     out_meta = ras_src.meta
     out_meta.update(
@@ -48,7 +49,7 @@ def clip_shp_to_geometry(
     # shpcrs = gdf.crs
     # geom_df = geom_df.to_crs(shpcrs)
     gdf = gdf.to_crs(geom_crs)
-    gdf = gdf[gdf.within(geom_df.iloc[0].geometry)]
+    gdf = gdf[gdf.within(geom_df.geometry)]
     if not outcrs is None:
         gdf = gdf.to_crs(outcrs)
     gdf.to_file(os.path.join(outdir, clipname + shpfile))
