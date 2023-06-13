@@ -76,12 +76,13 @@ def calc_karstification_for_HU10(HU10, sinkhole_dataset='USGS'):
     with rasterio.open(sinks_raster, 'w', **profile) as dest:
         dest.write(sinks_array.astype(rasterio.int32), 1)
     
-    
-    wat_elev = calc_karst_fraction(datadir='./',
-                                   demfile= os.path.join(rasterdir, rasterfile),
-                                   sinksfile=sinks_raster,
+    rasterdir = os.path.abspath(rasterdir)
+    sinksfile = os.path.abspath(os.path.join('.', sinks_raster))
+    p_karst = calc_karst_fraction(datadir=rasterdir,
+                                   demfile= rasterfile,
+                                   sinksfile=sinksfile,
                                    mean_filter=False)
-
+    return p_karst
 
 
 

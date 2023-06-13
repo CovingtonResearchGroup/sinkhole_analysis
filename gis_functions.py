@@ -49,7 +49,7 @@ def clip_shp_to_geometry(
     # shpcrs = gdf.crs
     # geom_df = geom_df.to_crs(shpcrs)
     gdf = gdf.to_crs(geom_crs)
-    gdf = gdf[gdf.within(geom_df.geometry)]
+    gdf = gdf[gdf.within(geom_df.values[0])]
     if not outcrs is None:
         gdf = gdf.to_crs(outcrs)
     gdf.to_file(os.path.join(outdir, clipname + shpfile))
