@@ -30,8 +30,9 @@ def calc_karstification_for_HU10(HU10, sinkhole_dataset="USGS"):
 
     # HU4 = HU10[:4]
     rasterdir = "./NHD-data/"
-    huc10_str = HU10.uri.split("/")[-1]
+    # huc10_str = HU10.uri.split("/")[-1]
     # huc10_str = HU10.iloc[0].huc10
+    huc10_str = HU10.huc12
     rasterfile = huc10_str + ".tif"
 
     # hu10_geom = HU10.geometry #gpd.read_file('NHD-data/NHDPLUS_H_' + HU4 + '_HU4_GDB.gdb', layer='WBDHU10')
@@ -70,19 +71,26 @@ def calc_karstification_for_HU10(HU10, sinkhole_dataset="USGS"):
     huc_sinks = gpd.read_file("./HUC-" + huc10_str + "-sinks-" + polytag + ".shp")
     huc_sinks["ID"] = huc_sinks.index.values
     sinks_list = huc_sinks[["geometry", "ID"]].values.tolist()
-    out_shape = imgsrc_elev.shape
-    out_trans = imgsrc_elev.transform
-    sinks_array = rasterio.features.rasterize(
-        sinks_list, fill=0, out_shape=out_shape, transform=out_trans
-    )
-    profile = imgsrc_elev.profile
-    sinks_raster = "HUC-" + huc10_str + "-sinks-SinkholePolys.tif"
-    with rasterio.open(sinks_raster, "w", **profile) as dest:
-        dest.write(sinks_array.astype(rasterio.int32), 1)
+    if len(sinks_list) == 0:
+        # no sinks in basin
+        return 0.0
+    else:
+        out_shape = imgsrc_elev.shape
+        out_trans = imgsrc_elev.transform
+        sinks_array = rasterio.features.rasterize(
+            sinks_list, fill=0, out_shape=out_shape, transform=out_trans
+        )
+        profile = imgsrc_elev.profile
+        sinks_raster = "HUC-" + huc10_str + "-sinks-SinkholePolys.tif"
+        with rasterio.open(sinks_raster, "w", **profile) as dest:
+            dest.write(sinks_array.astype(rasterio.int32), 1)
 
-    rasterdir = os.path.abspath(rasterdir)
-    sinksfile = os.path.abspath(os.path.join(".", sinks_raster))
-    p_karst = calc_karst_fraction(
-        datadir=rasterdir, demfile=rasterfile, sinksfile=sinksfile, mean_filter=False
-    )
-    return p_karst
+        rasterdir = os.path.abspath(rasterdir)
+        sinksfile = os.path.abspath(os.path.join(".", sinks_raster))
+        p_karst = calc_karst_fraction(
+            datadir=rasterdir,
+            demfile=rasterfile,
+            sinksfile=sinksfile,
+            mean_filter=False,
+        )
+        return p_karst
