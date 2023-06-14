@@ -13,7 +13,6 @@ def clip_raster_to_geometry(
     nodata=0,
     outcrs="",
 ):
-
     ras_src = rio.open(os.path.join(rasterdir, rasterfile))
     # ras_img = ras_src.read()
     # Make sure rasterfile ends in tif for output
