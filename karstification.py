@@ -5,6 +5,7 @@ import rasterio.features
 import rasterio.plot as riop
 import py3dep
 import rioxarray
+import string
 
 
 import os
@@ -12,7 +13,7 @@ from gis_functions import clip_raster_to_geometry, clip_shp_to_geometry
 from sinkhole_functions import calc_karst_fraction
 
 
-def calc_karstification_for_HU12(HU12, sinkhole_dataset="USGS", dem_res=5, project_dir='./qgis'):
+def calc_karstification_for_HU12(HU12, sinkhole_dataset="USGS", dem_res=5, project_dir='./qgis', boxname=''):
     """
     Download HU12 DEM and calculate karst index.
 
@@ -30,11 +31,13 @@ def calc_karstification_for_HU12(HU12, sinkhole_dataset="USGS", dem_res=5, proje
 
     # HU4 = HU10[:4]
     huc12_str = HU12.huc12
-    rasterdir = os.path.join(project_dir, huc12_str)#"./NHD-data/"
-    os.makedirs(rasterdir)
+    boxdirname = format_filename(boxname)
+    rasterdir = os.path.join(project_dir, boxdirname, huc12_str)#"./NHD-data/"
+    if not os.path.exists(rasterdir):
+        os.makedirs(rasterdir)
     # huc10_str = HU10.uri.split("/")[-1]
     # huc10_str = HU10.iloc[0].huc10
-    rasterfile = huc12_str + ".tif"
+    rasterfile = huc12_str + "-" + sinkhole_dataset + ".tif"
 
     # hu10_geom = HU10.geometry #gpd.read_file('NHD-data/NHDPLUS_H_' + HU4 + '_HU4_GDB.gdb', layer='WBDHU10')
     this_hu12 = HU12.geometry  # hu10[hu10.HUC10 == HU10]
@@ -53,24 +56,25 @@ def calc_karstification_for_HU12(HU12, sinkhole_dataset="USGS", dem_res=5, proje
     if sinkhole_dataset == "USGS":
         sinks_dir = "./karst_depression_polys_conus/"
         sinks_file = "karst_depression_polys_conus.shp"
-        polytag = "karst_depression_polys_conus"
+        # polytag = "karst_depression_polys_conus"
     elif sinkhole_dataset == "Mihevc":
         sinks_dir = ""
         sinks_file = ""
-        polytag = ""
+        # polytag = ""
     else:
         print("Invalid sinkhole_dataset parameter value of:", sinkhole_dataset)
         raise ValueError
 
+    clipname = huc12_str + '-sinks-'
     sinks = clip_shp_to_geometry(
-        clipname="HUC-" + huc12_str + "-sinks-",
+        clipname=clipname,
         shpdir=sinks_dir,
         outdir=rasterdir,
         shpfile=sinks_file,
         geom_df=HU12,  # this_hu10,
         outcrs=imgsrc_elev.crs,
     )
-    sinks_shp = os.path.join(rasterdir, "./HUC-" + huc12_str + "-sinks-" + polytag + ".shp")
+    sinks_shp = os.path.join(rasterdir, clipname + sinks_file)
     huc_sinks = gpd.read_file(sinks_shp)
     huc_sinks["ID"] = huc_sinks.index.values
     sinks_list = huc_sinks[["geometry", "ID"]].values.tolist()
@@ -84,7 +88,7 @@ def calc_karstification_for_HU12(HU12, sinkhole_dataset="USGS", dem_res=5, proje
             sinks_list, fill=0, out_shape=out_shape, transform=out_trans
         )
         profile = imgsrc_elev.profile
-        sinks_raster = os.path.join(rasterdir,"HUC-" + huc12_str + "-sinks-SinkholePolys.tif")
+        sinks_raster = sinks_shp[:-3] + 'tif' # os.path.join(rasterdir,"HUC-" + huc12_str + "-sinks-SinkholePolys.tif")
         with rasterio.open(sinks_raster, "w", **profile) as dest:
             dest.write(sinks_array.astype(rasterio.int32), 1)
 
@@ -97,3 +101,19 @@ def calc_karstification_for_HU12(HU12, sinkhole_dataset="USGS", dem_res=5, proje
             mean_filter=False,
         )
         return p_karst
+
+def format_filename(s):
+    """Take a string and return a valid filename constructed from the string.
+Uses a whitelist approach: any characters not present in valid_chars are
+removed. Also spaces are replaced with underscores.
+ 
+Note: this method may produce invalid filenames such as ``, `.` or `..`
+When I use this method I prepend a date string like '2009_01_15_19_46_32_'
+and append a file extension like '.txt', so I avoid the potential of using
+an invalid filename.
+ 
+"""
+    valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
+    filename = ''.join(c for c in s if c in valid_chars)
+    filename = filename.replace(' ','_') # I don't like spaces in filenames.
+    return filename
