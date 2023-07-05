@@ -31,8 +31,8 @@ def calc_karstification_for_HU12(HU12, sinkhole_dataset="USGS", dem_res=5, proje
 
     # HU4 = HU10[:4]
     huc12_str = HU12.huc12
-    boxdirname = format_filename(boxname)
-    rasterdir = os.path.join(project_dir, boxdirname, huc12_str)#"./NHD-data/"
+    #boxdirname = format_filename(boxname)
+    rasterdir = os.path.join(project_dir, boxname, huc12_str)#"./NHD-data/"
     if not os.path.exists(rasterdir):
         os.makedirs(rasterdir)
     # huc10_str = HU10.uri.split("/")[-1]
@@ -101,19 +101,3 @@ def calc_karstification_for_HU12(HU12, sinkhole_dataset="USGS", dem_res=5, proje
             mean_filter=False,
         )
         return p_karst
-
-def format_filename(s):
-    """Take a string and return a valid filename constructed from the string.
-Uses a whitelist approach: any characters not present in valid_chars are
-removed. Also spaces are replaced with underscores.
- 
-Note: this method may produce invalid filenames such as ``, `.` or `..`
-When I use this method I prepend a date string like '2009_01_15_19_46_32_'
-and append a file extension like '.txt', so I avoid the potential of using
-an invalid filename.
- 
-"""
-    valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
-    filename = ''.join(c for c in s if c in valid_chars)
-    filename = filename.replace(' ','_') # I don't like spaces in filenames.
-    return filename
