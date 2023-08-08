@@ -56,8 +56,9 @@ def calc_karstification_for_HU12(
             dem = py3dep.get_map("DEM", this_hu12, resolution=dem_res)
             finished = True
             failed = False
-        except:
-            print("Failed to retrieve DEM.")
+        except Exception as error:
+            print("Failed to retrieve DEM for", huc12_str + ".")
+            print("error:", error)
             tries += 1
             if tries > max_tries:
                 finished = True
