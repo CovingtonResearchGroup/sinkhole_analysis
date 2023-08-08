@@ -13,7 +13,14 @@ from gis_functions import clip_raster_to_geometry, clip_shp_to_geometry
 from sinkhole_functions import calc_karst_fraction
 
 
-def calc_karstification_for_HU12(HU12, sinkhole_dataset="USGS", dem_res=5, project_dir='./qgis', boxname=''):
+def calc_karstification_for_HU12(
+    HU12,
+    sinkhole_dataset="USGS",
+    dem_res=3,
+    project_dir="./qgis",
+    boxname="",
+    max_tries=10,
+):
     """
     Download HU12 DEM and calculate karst index.
 
@@ -31,8 +38,8 @@ def calc_karstification_for_HU12(HU12, sinkhole_dataset="USGS", dem_res=5, proje
 
     # HU4 = HU10[:4]
     huc12_str = HU12.huc12
-    #boxdirname = format_filename(boxname)
-    rasterdir = os.path.join(project_dir, boxname, huc12_str)#"./NHD-data/"
+    # boxdirname = format_filename(boxname)
+    rasterdir = os.path.join(project_dir, boxname, huc12_str)  # "./NHD-data/"
     if not os.path.exists(rasterdir):
         os.makedirs(rasterdir)
     # huc10_str = HU10.uri.split("/")[-1]
@@ -41,9 +48,24 @@ def calc_karstification_for_HU12(HU12, sinkhole_dataset="USGS", dem_res=5, proje
 
     # hu10_geom = HU10.geometry #gpd.read_file('NHD-data/NHDPLUS_H_' + HU4 + '_HU4_GDB.gdb', layer='WBDHU10')
     this_hu12 = HU12.geometry  # hu10[hu10.HUC10 == HU10]
-    dem = py3dep.get_map(
-        "DEM", this_hu12, resolution=dem_res
-    )  # , geo_crs="epsg:4326", crs="epsg:3857")
+    finished = False
+    tries = 0
+
+    while not finished:
+        try:
+            dem = py3dep.get_map("DEM", this_hu12, resolution=dem_res)
+            finished = True
+            failed = False
+        except:
+            print("Failed to retrieve DEM.")
+            tries += 1
+            if tries > max_tries:
+                finished = True
+                failed = True
+    if failed:
+        print("Failed to retrieve the DEM after", str(max_tries), "tries.")
+        return -1
+
     dem.rio.to_raster(os.path.join(rasterdir, rasterfile))
 
     # img_elev = clip_raster_to_geometry(rasterdir=rasterdir,
@@ -65,7 +87,7 @@ def calc_karstification_for_HU12(HU12, sinkhole_dataset="USGS", dem_res=5, proje
         print("Invalid sinkhole_dataset parameter value of:", sinkhole_dataset)
         raise ValueError
 
-    clipname = huc12_str + '-sinks-'
+    clipname = huc12_str + "-sinks-"
     sinks = clip_shp_to_geometry(
         clipname=clipname,
         shpdir=sinks_dir,
@@ -88,7 +110,9 @@ def calc_karstification_for_HU12(HU12, sinkhole_dataset="USGS", dem_res=5, proje
             sinks_list, fill=0, out_shape=out_shape, transform=out_trans
         )
         profile = imgsrc_elev.profile
-        sinks_raster = sinks_shp[:-3] + 'tif' # os.path.join(rasterdir,"HUC-" + huc12_str + "-sinks-SinkholePolys.tif")
+        sinks_raster = (
+            sinks_shp[:-3] + "tif"
+        )  # os.path.join(rasterdir,"HUC-" + huc12_str + "-sinks-SinkholePolys.tif")
         with rasterio.open(sinks_raster, "w", **profile) as dest:
             dest.write(sinks_array.astype(rasterio.int32), 1)
 
