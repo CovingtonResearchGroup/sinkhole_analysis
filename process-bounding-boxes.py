@@ -99,5 +99,5 @@ def process_box(bbox_enum):
     return box_hucs12
 
 
-with multiprocessing.Pool(processes=8) as pool:
+with multiprocessing.Pool(processes=n_processes) as pool:
     pool.map(process_box, enumerate(bbox_zip))
