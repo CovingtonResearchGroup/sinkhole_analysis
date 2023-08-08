@@ -68,9 +68,10 @@ def process_box(bbox_enum):
         box_path = os.path.join("./qgis/", box_dirname)
         if not os.path.exists(box_path):
             os.makedirs(box_path)
-        box_gdf.to_file(os.path.join(box_path, box_dirname + ".shp"))
+
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
+            box_gdf.to_file(os.path.join(box_path, box_dirname + ".shp"))
             box_hucs12.to_file(os.path.join(box_path, "box_hucs.shp"))
 
         for hu_idx in box_hucs12.index:
