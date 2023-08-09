@@ -1,3 +1,9 @@
+# Custom ignores for sinkhole_analysis
+
+qgis/
+cache/
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
