@@ -20,6 +20,7 @@ def calc_karstification_for_HU12(
     project_dir="./qgis",
     boxname="",
     max_tries=10,
+    use_avail_dems=True,
 ):
     """
     Download HU12 DEM and calculate karst index.
@@ -51,30 +52,36 @@ def calc_karstification_for_HU12(
     finished = False
     tries = 0
 
-    while not finished:
-        try:
-            dem = py3dep.get_map("DEM", this_hu12, resolution=dem_res)
-            finished = True
-            failed = False
-        except Exception as error:
-            print("Failed to retrieve DEM for", huc12_str + ".")
-            print("error:", error)
-            tries += 1
-            if tries > max_tries:
-                finished = True
-                failed = True
-    if failed:
-        print("Failed to retrieve the DEM after", str(max_tries), "tries.")
-        return -1
+    full_rasterfile_path = os.path.join(rasterdir, rasterfile)
 
-    dem.rio.to_raster(os.path.join(rasterdir, rasterfile))
+    # Check if we already have the dem
+    if not os.path.isfile(full_rasterfile_path) or not use_avail_dems:
+        while not finished:
+            try:
+                dem = py3dep.get_map("DEM", this_hu12, resolution=dem_res)
+                finished = True
+                failed = False
+            except Exception as error:
+                print("Failed to retrieve DEM for", huc12_str + ".")
+                print("error:", error)
+                tries += 1
+                if tries > max_tries:
+                    finished = True
+                    failed = True
+        if failed:
+            print("Failed to retrieve the DEM after", str(max_tries), "tries.")
+            return -1
+
+        dem.rio.to_raster(full_rasterfile_path)
+    else:
+        print("We already have dem raster", rasterfile, " continuing without download.")
 
     # img_elev = clip_raster_to_geometry(rasterdir=rasterdir,
     #                                    rasterfile=rasterfile,
     #                                    geom_df=this_hu10,
     #                                    clipname='HUC-' + huc10_str +'-')
 
-    imgsrc_elev = rio.open(os.path.join(rasterdir, rasterfile))
+    imgsrc_elev = rio.open(full_rasterfile_path)
 
     if sinkhole_dataset == "USGS":
         sinks_dir = "./karst_depression_polys_conus/"
