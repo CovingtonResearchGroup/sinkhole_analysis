@@ -8,6 +8,7 @@ from pynhd import pynhd
 import py3dep
 from shapely import box
 import os
+import sys
 import string
 import warnings
 import multiprocessing
@@ -17,7 +18,6 @@ import time
 
 hr = pynhd.NHDPlusHR("huc12")
 huc12 = pynhd.WaterData("wbd12", crs="epsg:4326")
-n_processes = 4
 box_df = read_excel("bounding_boxes.xlsx")
 bbox_zip = zip(box_df.x_min, box_df.y_min, box_df.x_max, box_df.y_max)
 
@@ -79,7 +79,9 @@ def process_box(bbox_enum):
             huc_num = hu.huc12
             print("HUC", huc_num)
             hu.crs = "EPSG:4326"
-            p_karst = calc_karstification_for_HU12(hu, boxname=box_dirname)
+            p_karst = calc_karstification_for_HU12(
+                hu, boxname=box_dirname, dem_res=dem_res
+            )
             p_karst_list.append(p_karst)
 
             print(
@@ -100,5 +102,10 @@ def process_box(bbox_enum):
     return box_hucs12
 
 
-with multiprocessing.Pool(processes=n_processes) as pool:
-    pool.map(process_box, enumerate(bbox_zip))
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        n_processes = int(sys.argv[1])
+    else:
+        n_processes = 4
+    with multiprocessing.Pool(processes=n_processes) as pool:
+        pool.map(process_box, enumerate(bbox_zip))
