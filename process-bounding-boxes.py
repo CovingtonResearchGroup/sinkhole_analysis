@@ -15,6 +15,7 @@ import multiprocessing
 import pickle
 from random import randint
 import time
+import argparse
 
 hr = pynhd.NHDPlusHR("huc12")
 huc12 = pynhd.WaterData("wbd12", crs="epsg:4326")
@@ -39,7 +40,7 @@ def format_filename(s):
     return filename
 
 
-def process_box(bbox_enum, overwrite=False):
+def process_box(bbox_enum, overwrite=False, sinks="USGS"):
     # Randomize query times to that they don't come at once
     sleeptime = randint(1, 10)
     time.sleep(sleeptime)
@@ -112,10 +113,39 @@ def process_box(bbox_enum, overwrite=False):
         print(boxname, "csv file already exists. Skipping.")
 
 
+def process_box_wrapper(process_args):
+    print(process_args)
+    print(len(process_args))
+    overwrite, sinks = process_args
+    bbox_enum = enumerate(bbox_zip)
+    process_box(bbox_enum, overwrite=overwrite, sinks=sinks)
+
+
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        n_processes = int(sys.argv[1])
-    else:
-        n_processes = 4
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-n",
+        "--ncpus",
+        help="number of processes to use for parallel processing (default 4)",
+        default="4",
+    )
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="If flag is set, then box directories with existing csv files will be rerun and overwritten.",
+    )
+    parser.add_argument(
+        "-s",
+        "--sinks",
+        help="Which sinks shapefile to use (default=USGS).",
+        choices=["USGS", "Mihevc"],
+        default="USGS",
+    )
+    args = parser.parse_args()
+    n_processes = int(args.ncpus)
+    overwrite = args.overwrite
+    sinks = args.sinks
+
     with multiprocessing.Pool(processes=n_processes) as pool:
-        pool.map(process_box, enumerate(bbox_zip))
+        process_args = [overwrite, sinks]
+        pool.map(process_box_wrapper, [process_args])
