@@ -109,8 +109,8 @@ def calc_karstification_for_HU12(
     huc_sinks = gpd.read_file(full_sinks_path, mask=huc_mask)
     sinks_shp = os.path.join(rasterdir, clipname + sinks_file)
     # Check if sinks file exists
-    if os.path.isfile(sinks_file):
-        os.remove(sinks_file[:-3] + "*")
+    if os.path.isfile(sinks_shp):
+        os.remove(sinks_shp[:-3] + "*")
     huc_sinks.to_file(sinks_shp)
     # huc_sinks = gpd.read_file(sinks_shp)
     huc_sinks["ID"] = huc_sinks.index.values
