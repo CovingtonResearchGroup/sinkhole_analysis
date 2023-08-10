@@ -96,16 +96,20 @@ def calc_karstification_for_HU12(
         raise ValueError
 
     clipname = huc12_str + "-sinks-"
-    sinks = clip_shp_to_geometry(
-        clipname=clipname,
-        shpdir=sinks_dir,
-        outdir=rasterdir,
-        shpfile=sinks_file,
-        geom_df=HU12,  # this_hu10,
-        outcrs=imgsrc_elev.crs,
-    )
+    # sinks = clip_shp_to_geometry(
+    #    clipname=clipname,
+    #    shpdir=sinks_dir,
+    #    outdir=rasterdir,
+    #    shpfile=sinks_file,
+    #    geom_df=HU12,  # this_hu10,
+    #    outcrs=imgsrc_elev.crs,
+    # )
+    full_sinks_path = os.path.join(sinks_dir, sinks_file)
+    huc_mask = gpd.GeoSeries([HU12.geometry], crs=HU12.crs)
+    huc_sinks = gpd.read_file(full_sinks_path, mask=huc_mask)
     sinks_shp = os.path.join(rasterdir, clipname + sinks_file)
-    huc_sinks = gpd.read_file(sinks_shp)
+    huc_sinks.to_file(sinks_shp)
+    # huc_sinks = gpd.read_file(sinks_shp)
     huc_sinks["ID"] = huc_sinks.index.values
     sinks_list = huc_sinks[["geometry", "ID"]].values.tolist()
     if len(sinks_list) == 0:
