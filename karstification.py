@@ -6,7 +6,7 @@ import rasterio.plot as riop
 import py3dep
 import rioxarray
 import string
-
+import glob
 
 import os
 from gis_functions import clip_raster_to_geometry, clip_shp_to_geometry
@@ -110,7 +110,8 @@ def calc_karstification_for_HU12(
     sinks_shp = os.path.join(rasterdir, clipname + sinks_file)
     # Check if sinks file exists
     if os.path.isfile(sinks_shp):
-        os.remove(sinks_shp[:-3] + "*")
+        for f in glob.glob(sinks_shp[:-3] + "*"):
+            os.remove(f)
     huc_sinks.to_file(sinks_shp)
     # huc_sinks = gpd.read_file(sinks_shp)
     huc_sinks["ID"] = huc_sinks.index.values
