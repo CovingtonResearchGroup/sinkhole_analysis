@@ -16,6 +16,9 @@ import pickle
 from random import randint
 import time
 import argparse
+from functools import partial
+
+
 
 hr = pynhd.NHDPlusHR("huc12")
 huc12 = pynhd.WaterData("wbd12", crs="epsg:4326")
@@ -147,5 +150,6 @@ if __name__ == "__main__":
     sinks = args.sinks
 
     with multiprocessing.Pool(processes=n_processes) as pool:
-        process_args = [overwrite, sinks]
-        pool.map(process_box_wrapper, [process_args])
+        # process_args = [overwrite, sinks]
+        process_box_wopts = partial(process_box, overwrite=overwrite, sinks=sinks)
+        pool.map(process_box_wopts, enumerate(bbox_zip))
