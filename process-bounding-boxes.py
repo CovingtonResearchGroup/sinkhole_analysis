@@ -52,8 +52,9 @@ def process_box(bbox_enum, overwrite=False, sinks="USGS"):
     box_dirname = format_filename(boxname)
     box_path = os.path.join("./qgis/", box_dirname)
     csv_exists = False
+    hucs_df_file = os.path.join(box_path, sinks+"-bbox_df.csv")
     if not overwrite:
-        if os.path.isfile(os.path.join(box_path, "bbox_df.csv")):
+        if os.path.isfile(hucs_df_file):
             csv_exists = True
 
     if overwrite or not csv_exists:
@@ -106,8 +107,7 @@ def process_box(bbox_enum, overwrite=False, sinks="USGS"):
             p_karst_list.append(-1)
 
         box_hucs12["p_karst"] = p_karst_list
-        output_hucs_file = os.path.join(box_path, "bbox_df.csv")
-        box_hucs12.to_csv(output_hucs_file)
+        box_hucs12.to_csv(hucs_df_file)
         return box_hucs12
     else:
         print(boxname, "csv file already exists. Skipping.")
