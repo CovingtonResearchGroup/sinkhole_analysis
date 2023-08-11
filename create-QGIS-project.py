@@ -57,7 +57,7 @@ def create_project(sinks_tag="USGS"):
                     rasterLayer.dataProvider(), 1, classes
                 )
                 rasterLayer.setRenderer(paletted_renderer)
-                rasterLayer.setOpacity(0.5)
+                rasterLayer.setOpacity(0.3)
 
             # map_layers.append(rasterLayer)
             # catchment_group.insertLayer(0,rasterLayer)
@@ -69,7 +69,7 @@ def create_project(sinks_tag="USGS"):
                 )
                 project.addMapLayer(vectorLayer, False)
                 sinkhole_group.addLayer(vectorLayer)
-                vectorLayer.setOpacity(0.5)
+                vectorLayer.setOpacity(0.3)
             # sinkhole_group.insertLayer(0, vectorLayer)
             # map_layers.append(vectorLayer)
 
@@ -78,14 +78,14 @@ def create_project(sinks_tag="USGS"):
         )
         project.addMapLayer(boxLayer, False)
         box_group.addLayer(boxLayer)
-        boxLayer.setOpacity(0.2)
+        boxLayer.setOpacity(0.1)
 
         hucsLayer = QgsVectorLayer(
             os.path.join(box, "box_hucs.shp"), "HUCS for " + boxname, "ogr"
         )
         project.addMapLayer(hucsLayer, False)
         box_group.addLayer(hucsLayer)
-        hucsLayer.setOpacity(0.3)
+        hucsLayer.setOpacity(0.2)
 
         sinkhole_group.setExpanded(False)
         catchment_group.setExpanded(False)
