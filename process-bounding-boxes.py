@@ -19,7 +19,6 @@ import argparse
 from functools import partial
 
 
-
 hr = pynhd.NHDPlusHR("huc12")
 huc12 = pynhd.WaterData("wbd12", crs="epsg:4326")
 box_df = read_excel("bounding_boxes.xlsx")
@@ -55,7 +54,7 @@ def process_box(bbox_enum, overwrite=False, sinks="USGS"):
     box_dirname = format_filename(boxname)
     box_path = os.path.join("./qgis/", box_dirname)
     csv_exists = False
-    hucs_df_file = os.path.join(box_path, sinks+"-bbox_df.csv")
+    hucs_df_file = os.path.join(box_path, sinks + "-bbox_df.csv")
     if not overwrite:
         if os.path.isfile(hucs_df_file):
             csv_exists = True
@@ -93,7 +92,10 @@ def process_box(bbox_enum, overwrite=False, sinks="USGS"):
                 print("HUC", huc_num)
                 hu.crs = "EPSG:4326"
                 p_karst = calc_karstification_for_HU12(
-                    hu, boxname=box_dirname, dem_res=dem_res
+                    hu,
+                    boxname=box_dirname,
+                    dem_res=dem_res,
+                    sinkhole_dataset=sinks,
                 )
                 p_karst_list.append(p_karst)
 
