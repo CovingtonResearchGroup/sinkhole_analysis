@@ -46,10 +46,9 @@ def remove_catchment_files(arg):
 
 def remove_all_but_dem():
     remove_whitebox_outputs()
-    remove_box_dir_outputs('all')
-    remove_sink_files('all')
-    remove_catchment_files('all')
-
+    remove_box_dir_outputs("all")
+    remove_sink_files("all")
+    remove_catchment_files("all")
 
 
 if __name__ == "__main__":
@@ -84,10 +83,10 @@ if __name__ == "__main__":
         "--sinks",
         help="Remove HUC sink files.",
         choices=["USGS", "Mihevc", "all"],
-    )    
+    )
     parser.add_argument(
         "-a",
-        "--all"
+        "--all",
         help="Remove all output files but dem files.",
         action="store_true",
     )
@@ -106,4 +105,3 @@ if __name__ == "__main__":
             remove_sink_files(args.sinks)
         if args.catchment is not None:
             remove_catchment_files(args.catchment)
-        
