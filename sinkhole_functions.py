@@ -11,17 +11,23 @@ def rasterize_sinks_shp(shpfile, outfile, basefile):
 
 
 def calc_karst_fraction(
-    datadir, demfile, sinksfile=None, fill_pits=True, mean_filter=True
+    datadir,
+    demfile,
+    sinksfile=None,
+    fill_pits=True,
+    mean_filter=True,
+    basefilename=None,
 ):
-    basefilename = demfile.split(".")[0]
+    if basefilename is None:
+        basefilename = demfile.split(".")[0]
 
     # Define filenames
     dempath = os.path.join(datadir, demfile)
-    pitfill_dempath = os.path.join(datadir, basefilename + "-pitfill.tif")
-    smoothed_dempath = os.path.join(datadir, basefilename + "-smoothed.tif")
-    sinkspath = os.path.join(datadir, basefilename + "-sinks.tif")
-    d8path = os.path.join(datadir, basefilename + "-d8.tif")
-    watershedspath = os.path.join(datadir, basefilename + "-wat.tif")
+    pitfill_dempath = os.path.join(datadir, demfile[:-4] + "-pitfill.tif")
+    smoothed_dempath = os.path.join(datadir, demfile[:-4] + "-smoothed.tif")
+    sinkspath = os.path.join(datadir, demfile[:-4] + "-sinks.tif")
+    d8path = os.path.join(datadir, demfile[:-4] + "-d8.tif")
+    watershedspath = os.path.join(datadir, basefilename + "-catchments.tif")
 
     if mean_filter:
         # Smooth dem

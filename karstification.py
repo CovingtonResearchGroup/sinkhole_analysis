@@ -37,18 +37,13 @@ def calc_karstification_for_HU12(
     float : ki - Karstification index
     """
 
-    # HU4 = HU10[:4]
     huc12_str = HU12.huc12
-    # boxdirname = format_filename(boxname)
-    rasterdir = os.path.join(project_dir, boxname, huc12_str)  # "./NHD-data/"
+    rasterdir = os.path.join(project_dir, boxname, huc12_str)
     if not os.path.exists(rasterdir):
         os.makedirs(rasterdir)
-    # huc10_str = HU10.uri.split("/")[-1]
-    # huc10_str = HU10.iloc[0].huc10
-    rasterfile = huc12_str + "-" + sinkhole_dataset + ".tif"
+    rasterfile = huc12_str + "-3DEP.tif"
 
-    # hu10_geom = HU10.geometry #gpd.read_file('NHD-data/NHDPLUS_H_' + HU4 + '_HU4_GDB.gdb', layer='WBDHU10')
-    this_hu12 = HU12.geometry  # hu10[hu10.HUC10 == HU10]
+    this_hu12 = HU12.geometry
     finished = False
     tries = 0
 
@@ -76,11 +71,6 @@ def calc_karstification_for_HU12(
     else:
         print("We already have dem raster", rasterfile, " continuing without download.")
 
-    # img_elev = clip_raster_to_geometry(rasterdir=rasterdir,
-    #                                    rasterfile=rasterfile,
-    #                                    geom_df=this_hu10,
-    #                                    clipname='HUC-' + huc10_str +'-')
-
     imgsrc_elev = rio.open(full_rasterfile_path)
 
     if sinkhole_dataset == "USGS":
@@ -95,25 +85,19 @@ def calc_karstification_for_HU12(
         print("Invalid sinkhole_dataset parameter value of:", sinkhole_dataset)
         raise ValueError
 
-    clipname = huc12_str + "-sinks-"
-    # sinks = clip_shp_to_geometry(
-    #    clipname=clipname,
-    #    shpdir=sinks_dir,
-    #    outdir=rasterdir,
-    #    shpfile=sinks_file,
-    #    geom_df=HU12,  # this_hu10,
-    #    outcrs=imgsrc_elev.crs,
-    # )
     full_sinks_path = os.path.join(sinks_dir, sinks_file)
     huc_mask = gpd.GeoSeries([HU12.geometry], crs=HU12.crs)
     huc_sinks = gpd.read_file(full_sinks_path, mask=huc_mask)
-    sinks_shp = os.path.join(rasterdir, clipname + sinks_file)
+    sinks_shp = os.path.join(
+        rasterdir, huc12_str + "-" + sinkhole_dataset + "-sinks.shp"
+    )
     # Check if sinks file exists
+    # Fiona seems to fail if empty file exists, which can happen in failed runs.
+    # To avoid this, we will remove any prior files.
     if os.path.isfile(sinks_shp):
         for f in glob.glob(sinks_shp[:-3] + "*"):
             os.remove(f)
     huc_sinks.to_file(sinks_shp)
-    # huc_sinks = gpd.read_file(sinks_shp)
     huc_sinks["ID"] = huc_sinks.index.values
     sinks_list = huc_sinks[["geometry", "ID"]].values.tolist()
     if len(sinks_list) == 0:
@@ -126,18 +110,18 @@ def calc_karstification_for_HU12(
             sinks_list, fill=0, out_shape=out_shape, transform=out_trans
         )
         profile = imgsrc_elev.profile
-        sinks_raster = (
-            sinks_shp[:-3] + "tif"
-        )  # os.path.join(rasterdir,"HUC-" + huc12_str + "-sinks-SinkholePolys.tif")
+        sinks_raster = sinks_shp[:-3] + "tif"
         with rasterio.open(sinks_raster, "w", **profile) as dest:
             dest.write(sinks_array.astype(rasterio.int32), 1)
 
         rasterdir = os.path.abspath(rasterdir)
         sinksfile = os.path.abspath(os.path.join(".", sinks_raster))
+        basefilename = huc12_str + "-" + sinkhole_dataset
         p_karst = calc_karst_fraction(
             datadir=rasterdir,
             demfile=rasterfile,
             sinksfile=sinksfile,
             mean_filter=False,
+            basefilename=basefilename,
         )
         return p_karst
