@@ -98,6 +98,7 @@ def calc_karstification_for_HU12(
         for f in glob.glob(sinks_shp[:-3] + "*"):
             os.remove(f)
     huc_sinks.to_file(sinks_shp)
+    huc_sinks = huc_sinks.to_crs(imgsrc_elev.crs)
     huc_sinks["ID"] = huc_sinks.index.values
     sinks_list = huc_sinks[["geometry", "ID"]].values.tolist()
     if len(sinks_list) == 0:

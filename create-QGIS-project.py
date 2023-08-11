@@ -107,7 +107,7 @@ def create_project(sinks_tag="USGS"):
                 n.setExpanded(False)
                 print(f"Layer group '{n.name()}' now collapsed.")
 
-    project.write("./qgis/Sink-catchments" + sinks_tag + ".qgs")
+    project.write("./qgis/Sink-catchments-" + sinks_tag + ".qgs")
 
     qgs.exitQgis()
 
