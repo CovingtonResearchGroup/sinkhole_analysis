@@ -5,12 +5,15 @@ import os
 
 def remove_files(regex):
     outs = glob.glob(regex, recursive=True)
-    print(outs)
+    file_outs = []
+    for f in outs:
+        if os.path.isfile(f):
+            file_outs.append(f)
+    print(file_outs)
     confirm = input("Remove these files (y/n)? ")
     if confirm == "y":
-        for f in outs:
-            if os.path.isfile(f):
-                os.remove(f)
+        for f in file_outs:
+            os.remove(f)
 
 
 def remove_whitebox_outputs():
