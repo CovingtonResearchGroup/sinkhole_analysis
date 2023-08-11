@@ -29,7 +29,7 @@ def create_project(sinks_tag="USGS"):
     # root.insertLayer(2, WMSLayer)
 
     box_dirs = glob.glob("qgis/*/")
-
+    box_dirs.sort()
     for box in box_dirs:
         boxname = box.split("/")[-2]
         print("Boxname=", boxname)
