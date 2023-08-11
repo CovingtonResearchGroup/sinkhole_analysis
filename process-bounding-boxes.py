@@ -22,6 +22,7 @@ from functools import partial
 hr = pynhd.NHDPlusHR("huc12")
 huc12 = pynhd.WaterData("wbd12", crs="epsg:4326")
 box_df = read_excel("bounding_boxes.xlsx")
+# box_df = read_excel("bounding_boxes_small.xlsx")
 bbox_zip = zip(box_df.x_min, box_df.y_min, box_df.x_max, box_df.y_max)
 project_dir = "./qgis"
 
@@ -143,7 +144,7 @@ if __name__ == "__main__":
         "-s",
         "--sinks",
         help="Which sinks shapefile to use (default=USGS).",
-        choices=["USGS", "Mihevc"],
+        choices=["USGS", "Mihevc", "Combined"],
         default="USGS",
     )
     args = parser.parse_args()

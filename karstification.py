@@ -76,11 +76,12 @@ def calc_karstification_for_HU12(
     if sinkhole_dataset == "USGS":
         sinks_dir = "./karst_depression_polys_conus/"
         sinks_file = "karst_depression_polys_conus.shp"
-        # polytag = "karst_depression_polys_conus"
     elif sinkhole_dataset == "Mihevc":
         sinks_dir = "./us-dolines-mihevc"
         sinks_file = "merged-us-dolines.shp"
-        # polytag = ""
+    elif sinkhole_dataset == "Combined":
+        sinks_dir = "./combined-sinkholes"
+        sinks_file = "combined-sinkholes-dissolved.shp"
     else:
         print("Invalid sinkhole_dataset parameter value of:", sinkhole_dataset)
         raise ValueError
