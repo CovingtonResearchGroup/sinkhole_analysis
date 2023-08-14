@@ -41,5 +41,5 @@ if __name__ == "__main__":
         choices=["USGS", "Mihevc", "Combined"],
     )
     args = parser.parse_args()
-    sinks_dataset = sinks_dataset
+    sinks_dataset = args.sinks_dataset
     concat_csvs(sinks_dataset)
