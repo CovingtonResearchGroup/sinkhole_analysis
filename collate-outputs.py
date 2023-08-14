@@ -30,7 +30,7 @@ def concat_csvs(sinks_dataset):
     box_df_concat = box_df_concat.drop_duplicates()
 
     # Output concatenated df
-    box_df_concat.to_csv(sinks_dataset + "concat.csv")
+    box_df_concat.to_csv(sinks_dataset + "-concat.csv")
 
 
 if __name__ == "__main__":
