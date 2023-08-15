@@ -7,6 +7,10 @@ from qgis.core import (
     QgsPalettedRasterRenderer,
     QgsRandomColorRamp,
     QgsCoordinateReferenceSystem,
+    QgsSymbol,
+    QgsRendererCategory,
+    QgsStyle,
+    QgsCategorizedSymbolRenderer,
 )
 import glob
 import os
@@ -92,6 +96,30 @@ def create_project(sinks_tag="USGS"):
         box_group.setExpanded(False)
         # project.addMapLayers([rasterLayer, vectorLayer, WMSLayer])
 
+    karst_group = root.addGroup("USGS Karst Map")
+    karst_layer = QgsVectorLayer(
+        "./USGS-Karst-Map/Carbonates48.shp", "Carbonates 48", "ogr"
+    )
+    project.addMapLayer(karst_layer, False)
+    rock_type = karst_layer.fields().lookupField("ROCKTYPE1")
+    unique_values = karst_layer.uniqueValues(rock_type)
+
+    categories = []
+    for value in unique_values:
+        symbol = QgsSymbol.defaultSymbol(karst_layer.geometryType())
+        category = QgsRendererCategory(value, symbol, str(value))
+        categories.append(category)
+
+    renderer = QgsCategorizedSymbolRenderer("ROCKTYPE1", categories)
+    renderer.updateColorRamp(QgsRandomColorRamp())
+    karst_layer.setRenderer(renderer)
+    karst_layer.triggerRepaint()
+
+    karst_layer.setOpacity(0.3)
+
+    karst_group.addLayer(karst_layer)
+    karst_group.setExpanded(False)
+
     dem_group = root.addGroup("Hillshade")
     url_with_params = "contextualWMSLegend=0&crs=EPSG:4326&dpiMode=7&featureCount=10&format=image/tiff&layers=3DEPElevation:Hillshade%20Gray&styles&url=https://elevation.nationalmap.gov/arcgis/services/3DEPElevation/ImageServer/WMSServer"
     WMSLayer = QgsRasterLayer(url_with_params, "3DEP Hillshade", "wms")
@@ -103,7 +131,7 @@ def create_project(sinks_tag="USGS"):
     nodes = root.children()
     for n in nodes:
         if isinstance(n, QgsLayerTreeGroup):
-            if n.isExpanded() == True:
+            if n.isExpanded() is True:
                 n.setExpanded(False)
                 print(f"Layer group '{n.name()}' now collapsed.")
 
