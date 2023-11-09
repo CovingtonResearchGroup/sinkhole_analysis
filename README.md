@@ -11,3 +11,5 @@ To overwrite results with exciting bbox csv files, use `--overwrite` flag.
 To create QGIS project, run `create-QGIS-project.py (USGS,Mihevc, or Combined)`.
 
 Then, for sharing run QGIS from conda env in `qgis` subdir on project file. Then activate QConsolidate plugin and export without zip. Zip the consolidated project for sharing.
+
+Finally, you can create collated csv file with HUC info and karst percentages by running `python collate-outputs.py (USGS,Mihevc,Combined)`.
