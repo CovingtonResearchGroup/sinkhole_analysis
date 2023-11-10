@@ -3,6 +3,11 @@ import pandas as pd
 import os
 import argparse
 
+def delete_bbox_csvs(sinks_dataset):
+    csvs = glob.glob("./qgis/**/"+sinks_dataset+"-bbox_df.csv", recursive=True)
+    for csv in csvs:
+        os.remove(csv)
+
 
 def concat_csvs(sinks_dataset):
     # Define the directory path
@@ -33,6 +38,8 @@ def concat_csvs(sinks_dataset):
     box_df_concat.to_csv(sinks_dataset + "-concat.csv")
 
 
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -40,6 +47,16 @@ if __name__ == "__main__":
         help="Specify the sinkhole dataset.",
         choices=["USGS", "Mihevc", "Combined"],
     )
+    parser.add_argument(
+        "--clean",
+        action="store_true",
+        help="Delete all corresponding csv files.")
     args = parser.parse_args()
+    clean = args.clean
     sinks_dataset = args.sinks_dataset
-    concat_csvs(sinks_dataset)
+    if clean:
+        ans = input("Are you sure you want to delete all csv files for "+sinks_dataset+"? (y/n)")
+        if ans == 'y':
+            delete_bbox_csvs(sinks_dataset)
+    else:
+        concat_csvs(sinks_dataset)
