@@ -48,6 +48,7 @@ def process_box(bbox_enum, overwrite=False, sinks="USGS"):
     sleeptime = randint(1, 10)
     time.sleep(sleeptime)
     p_karst_list = []
+    dem_res_list = []
     i, bbox = bbox_enum
     boxname = box_df.Name[i]
     print("Processing", boxname)
@@ -99,6 +100,7 @@ def process_box(bbox_enum, overwrite=False, sinks="USGS"):
                     sinkhole_dataset=sinks,
                 )
                 p_karst_list.append(p_karst)
+                dem_res_list.append(dem_res)
 
                 print(
                     "HU",
@@ -111,8 +113,10 @@ def process_box(bbox_enum, overwrite=False, sinks="USGS"):
         else:
             print("No dem available at required resolutions.")
             p_karst_list.append(-1)
+            dem_res_list.append(-1)
 
         box_hucs12["p_karst"] = p_karst_list
+        box_hucs12["dem_res"] = dem_res_list
         box_hucs12.to_csv(hucs_df_file)
         return box_hucs12
     else:
