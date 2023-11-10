@@ -51,6 +51,13 @@ def process_box(bbox_enum, overwrite=False, sinks="USGS"):
     dem_res_list = []
     i, bbox = bbox_enum
     boxname = box_df.Name[i]
+    if bbox[2] < bbox[0]:
+        # X min and max are switched
+        bbox = (bbox[2], bbox[1], bbox[0], bbox[3])
+    if bbox[3] < bbox[1]:
+        # Y min and max are switched
+        bbox = (bbox[0], bbox[3], bbox[2], bbox[1])
+
     print("Processing", boxname)
     # Check if box csv already exists
     box_dirname = format_filename(boxname)
