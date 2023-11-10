@@ -60,17 +60,18 @@ def calc_karst_fraction(
     # Find watersheds of sinks
     wbt.watershed(d8path, sinkspath, watershedspath)
     wat_src = rio.open(watershedspath)
-    wat = wat_src.read()
     dem_src = rio.open(dempath)
-    wat_elev = dem_src.read()
     ndv = dem_src.nodata
     if huc is not None:
-        huc_crs = huc.crs
         huc_geom = huc.geometry
         huc_carbs = gpd.read_file('./USGS-Karst-Map/Dissolved_carbonates_seperate_polys_E_B3.shp', mask=huc_geom)
         carbs_dissolved = huc_carbs.dissolve()
         carbs_only_huc = huc_geom.intersection(carbs_dissolved.iloc[0].geometry)
-        wat, wat_out_transform = rio.mask.mask(dem_src, [carbs_only_huc], crop=True, nodata=ndv)
+        wat_elev, wat_out_transform = rio.mask.mask(dem_src, [carbs_only_huc], crop=True, nodata=ndv)
+        wat, wat_elev_out_transform = rio.mask.mask(wat_src, [carbs_only_huc], crop=True, nodata=ndv)
+    else:
+        wat_elev = dem_src.read()
+        wat = wat_src.read()
     nkarst = len(wat[wat > 0])
     ntotal = len(wat_elev[wat_elev != ndv])
     # nfluvial = len(wat[wat < 0])
