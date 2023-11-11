@@ -70,6 +70,9 @@ def calc_karst_fraction(
             carbs_only_huc = huc_geom.intersection(carbs_dissolved.iloc[0].geometry)
             wat_elev, wat_out_transform = rio.mask.mask(dem_src, [carbs_only_huc], crop=True)
             wat, wat_elev_out_transform = rio.mask.mask(wat_src, [carbs_only_huc], crop=True)
+            carbs_only_df = gpd.GeoDataFrame({'geometry':[carbs_only_huc]}, crs=huc.crs)
+            carbs_only_file = os.path.join(datadir,demfile.split('-')[0]+'-carbs_only_huc.shp' )
+            carbs_only_df.to_file(carbs_only_file)
         else:
             return 0
     else:
