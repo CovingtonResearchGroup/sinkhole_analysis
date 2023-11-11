@@ -41,6 +41,7 @@ def create_project(sinks_tag="USGS"):
         box_group = root.addGroup(boxname)
         sinkhole_group = box_group.addGroup("Sinkholes")
         catchment_group = box_group.addGroup("Catchments")
+        carbs_hucs_group = box_group.addGroupt("Carbonate only HUCS")
 
         for huc in huc_dirs:
             huc_num = huc.split("/")[-2]
@@ -77,6 +78,15 @@ def create_project(sinks_tag="USGS"):
             # sinkhole_group.insertLayer(0, vectorLayer)
             # map_layers.append(vectorLayer)
 
+            carb_huc_path = os.path.join(huc, huc_num + '-carbs_only_huc.shp')
+            if os.path.exists(carb_huc_path):
+                carbHUCLayer = QgsVectorLayer(
+                    carb_huc_path, "Carb HUC " + huc_num, "ogr"
+                )
+                project.addMapLayer(carbHUCLayer, False)
+                sinkhole_group.addLayer(carbHUCLayer)
+                carbHUCLayer.setOpacity(0.3)
+                
         boxLayer = QgsVectorLayer(
             os.path.join(box, boxname + ".shp"), "Bounding box " + boxname, "ogr"
         )
