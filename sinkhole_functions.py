@@ -65,10 +65,13 @@ def calc_karst_fraction(
     if huc is not None:
         huc_geom = huc.geometry
         huc_carbs = gpd.read_file('./USGS-Karst-Map/Dissolved_carbonates_seperate_polys_E_B3.shp', mask=huc_geom)
-        carbs_dissolved = huc_carbs.dissolve()
-        carbs_only_huc = huc_geom.intersection(carbs_dissolved.iloc[0].geometry)
-        wat_elev, wat_out_transform = rio.mask.mask(dem_src, [carbs_only_huc], crop=True)
-        wat, wat_elev_out_transform = rio.mask.mask(wat_src, [carbs_only_huc], crop=True)
+        if len(huc_carbs)>0:
+            carbs_dissolved = huc_carbs.dissolve()
+            carbs_only_huc = huc_geom.intersection(carbs_dissolved.iloc[0].geometry)
+            wat_elev, wat_out_transform = rio.mask.mask(dem_src, [carbs_only_huc], crop=True)
+            wat, wat_elev_out_transform = rio.mask.mask(wat_src, [carbs_only_huc], crop=True)
+        else:
+            return 0
     else:
         wat_elev = dem_src.read()
         wat = wat_src.read()
