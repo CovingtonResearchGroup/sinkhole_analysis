@@ -1,5 +1,6 @@
 import rasterio as rio
 from whitebox.whitebox_tools import WhiteboxTools
+import geopandas as gpd
 
 import os
 
@@ -17,10 +18,12 @@ def calc_karst_fraction(
     fill_pits=True,
     mean_filter=True,
     basefilename=None,
+    huc=None,
 ):
     if basefilename is None:
         basefilename = demfile.split(".")[0]
-
+    datadir = os.path.abspath(datadir)
+    sinksfile = os.path.abspath(sinksfile)
     # Define filenames
     dempath = os.path.join(datadir, demfile)
     pitfill_dempath = os.path.join(datadir, demfile[:-4] + "-pitfill.tif")
@@ -57,11 +60,25 @@ def calc_karst_fraction(
     # Find watersheds of sinks
     wbt.watershed(d8path, sinkspath, watershedspath)
     wat_src = rio.open(watershedspath)
-    wat = wat_src.read()
-    nkarst = len(wat[wat > 0])
     dem_src = rio.open(dempath)
-    wat_elev = dem_src.read()
     ndv = dem_src.nodata
+    if huc is not None:
+        huc_geom = huc.geometry
+        huc_carbs = gpd.read_file('./USGS-Karst-Map/Dissolved_carbonates_seperate_polys_E_B3.shp', mask=huc_geom)
+        if len(huc_carbs)>0:
+            carbs_dissolved = huc_carbs.dissolve()
+            carbs_only_huc = huc_geom.intersection(carbs_dissolved.iloc[0].geometry)
+            wat_elev, wat_out_transform = rio.mask.mask(dem_src, [carbs_only_huc], crop=True)
+            wat, wat_elev_out_transform = rio.mask.mask(wat_src, [carbs_only_huc], crop=True)
+            carbs_only_df = gpd.GeoDataFrame({'geometry':[carbs_only_huc]}, crs=huc.crs)
+            carbs_only_file = os.path.join(datadir,demfile.split('-')[0]+'-carbs_only_huc.shp' )
+            carbs_only_df.to_file(carbs_only_file)
+        else:
+            return 0
+    else:
+        wat_elev = dem_src.read()
+        wat = wat_src.read()
+    nkarst = len(wat[wat > 0])
     ntotal = len(wat_elev[wat_elev != ndv])
     # nfluvial = len(wat[wat < 0])
     nfluvial = ntotal - nkarst

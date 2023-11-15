@@ -125,5 +125,6 @@ def calc_karstification_for_HU12(
             sinksfile=sinksfile,
             mean_filter=False,
             basefilename=basefilename,
+            huc = HU12,
         )
         return p_karst
