@@ -2,8 +2,13 @@
 
 qgis/
 cache/
-
-
+PR/
+*.shp 
+*.shx 
+*.prj 
+*.dbf 
+*.cpg 
+*.csv 
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
