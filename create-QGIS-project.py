@@ -41,7 +41,7 @@ def create_project(sinks_tag="USGS"):
         box_group = root.addGroup(boxname)
         sinkhole_group = box_group.addGroup("Sinkholes")
         catchment_group = box_group.addGroup("Catchments")
-        carbs_hucs_group = box_group.addGroupt("Carbonate only HUCS")
+        carbs_hucs_group = box_group.addGroup("Carbonate only HUCS")
 
         for huc in huc_dirs:
             huc_num = huc.split("/")[-2]
@@ -84,7 +84,7 @@ def create_project(sinks_tag="USGS"):
                     carb_huc_path, "Carb HUC " + huc_num, "ogr"
                 )
                 project.addMapLayer(carbHUCLayer, False)
-                sinkhole_group.addLayer(carbHUCLayer)
+                carbs_hucs_group.addLayer(carbHUCLayer)
                 carbHUCLayer.setOpacity(0.3)
                 
         boxLayer = QgsVectorLayer(
@@ -104,6 +104,7 @@ def create_project(sinks_tag="USGS"):
         sinkhole_group.setExpanded(False)
         catchment_group.setExpanded(False)
         box_group.setExpanded(False)
+        carbs_hucs_group.setExpanded(False)
         # project.addMapLayers([rasterLayer, vectorLayer, WMSLayer])
 
     karst_group = root.addGroup("USGS Karst Map")
