@@ -49,6 +49,7 @@ def process_box(bbox_enum, overwrite=False, sinks="USGS"):
     time.sleep(sleeptime)
     p_karst_list = []
     dem_res_list = []
+    carbs_only_huc_list = []
     i, bbox = bbox_enum
     boxname = box_df.Name[i]
     if bbox[2] < bbox[0]:
@@ -100,7 +101,7 @@ def process_box(bbox_enum, overwrite=False, sinks="USGS"):
                 huc_num = hu.huc12
                 print("HUC", huc_num)
                 hu.crs = "EPSG:4326"
-                p_karst = calc_karstification_for_HU12(
+                p_karst, carbs_only_huc = calc_karstification_for_HU12(
                     hu,
                     boxname=box_dirname,
                     dem_res=dem_res,
@@ -108,7 +109,7 @@ def process_box(bbox_enum, overwrite=False, sinks="USGS"):
                 )
                 p_karst_list.append(p_karst)
                 dem_res_list.append(dem_res)
-
+                carbs_only_huc_list.append(carbs_only_huc)
                 print(
                     "HU",
                     huc_num,
@@ -121,9 +122,13 @@ def process_box(bbox_enum, overwrite=False, sinks="USGS"):
             print("No dem available at required resolutions.")
             p_karst_list.append(-1)
             dem_res_list.append(-1)
+            carbs_only_huc_list.append("POINT EMPTY")
 
         box_hucs12["p_karst"] = p_karst_list
         box_hucs12["dem_res"] = dem_res_list
+        # Doesn't seem to work. These are recorded in separate shp files anyway.
+        # box_hucs12.rename(columns={"geometry": "full_hucs"})
+        box_hucs12["geometry"] = carbs_only_huc_list
         box_hucs12.to_csv(hucs_df_file)
         return box_hucs12
     else:

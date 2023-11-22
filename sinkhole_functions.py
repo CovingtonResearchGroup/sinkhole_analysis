@@ -64,14 +64,25 @@ def calc_karst_fraction(
     ndv = dem_src.nodata
     if huc is not None:
         huc_geom = huc.geometry
-        huc_carbs = gpd.read_file('./USGS-Karst-Map/Dissolved_carbonates_seperate_polys_E_B3.shp', mask=huc_geom)
-        if len(huc_carbs)>0:
+        huc_carbs = gpd.read_file(
+            "./USGS-Karst-Map/Dissolved_carbonates_seperate_polys_E_B3.shp",
+            mask=huc_geom,
+        )
+        if len(huc_carbs) > 0:
             carbs_dissolved = huc_carbs.dissolve()
             carbs_only_huc = huc_geom.intersection(carbs_dissolved.iloc[0].geometry)
-            wat_elev, wat_out_transform = rio.mask.mask(dem_src, [carbs_only_huc], crop=True)
-            wat, wat_elev_out_transform = rio.mask.mask(wat_src, [carbs_only_huc], crop=True)
-            carbs_only_df = gpd.GeoDataFrame({'geometry':[carbs_only_huc]}, crs=huc.crs)
-            carbs_only_file = os.path.join(datadir,demfile.split('-')[0]+'-carbs_only_huc.shp' )
+            wat_elev, wat_out_transform = rio.mask.mask(
+                dem_src, [carbs_only_huc], crop=True
+            )
+            wat, wat_elev_out_transform = rio.mask.mask(
+                wat_src, [carbs_only_huc], crop=True
+            )
+            carbs_only_df = gpd.GeoDataFrame(
+                {"geometry": [carbs_only_huc]}, crs=huc.crs
+            )
+            carbs_only_file = os.path.join(
+                datadir, demfile.split("-")[0] + "-carbs_only_huc.shp"
+            )
             carbs_only_df.to_file(carbs_only_file)
         else:
             return 0
@@ -86,4 +97,4 @@ def calc_karst_fraction(
     print("n fluvial draining pixels =", nfluvial)
     p_karst = nkarst / (nkarst + nfluvial)
     print("percent karst =", p_karst)
-    return p_karst
+    return p_karst, carbs_only_huc

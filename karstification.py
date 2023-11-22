@@ -65,7 +65,7 @@ def calc_karstification_for_HU12(
                     failed = True
         if failed:
             print("Failed to retrieve the DEM after", str(max_tries), "tries.")
-            return -1
+            return -1, None
 
         dem.rio.to_raster(full_rasterfile_path)
     else:
@@ -104,7 +104,7 @@ def calc_karstification_for_HU12(
     sinks_list = huc_sinks[["geometry", "ID"]].values.tolist()
     if len(sinks_list) == 0:
         # no sinks in basin
-        return 0.0
+        return 0.0, None
     else:
         out_shape = imgsrc_elev.shape
         out_trans = imgsrc_elev.transform
@@ -119,12 +119,12 @@ def calc_karstification_for_HU12(
         rasterdir = os.path.abspath(rasterdir)
         sinksfile = os.path.abspath(os.path.join(".", sinks_raster))
         basefilename = huc12_str + "-" + sinkhole_dataset
-        p_karst = calc_karst_fraction(
+        p_karst, carbs_only_huc = calc_karst_fraction(
             datadir=rasterdir,
             demfile=rasterfile,
             sinksfile=sinksfile,
             mean_filter=False,
             basefilename=basefilename,
-            huc = HU12,
+            huc=HU12,
         )
-        return p_karst
+        return p_karst, carbs_only_huc
