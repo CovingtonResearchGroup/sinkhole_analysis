@@ -59,7 +59,7 @@ def process_box(bbox_enum, overwrite=False, sinks="USGS"):
         # Y min and max are switched
         bbox = (bbox[0], bbox[3], bbox[2], bbox[1])
 
-    print("Processing", boxname)
+    print("Processing", boxname, bbox)
     # Check if box csv already exists
     box_dirname = format_filename(boxname)
     box_path = os.path.join("./qgis/", box_dirname)
@@ -72,7 +72,7 @@ def process_box(bbox_enum, overwrite=False, sinks="USGS"):
     if overwrite or not csv_exists:
         box_hucs12 = huc12.bybox(bbox)
         # Check available resolution
-        avail = py3dep.check_3dep_availability(box_hucs12.bounds)
+        avail = py3dep.check_3dep_availability(tuple(box_hucs12.total_bounds))
         if avail["3m"] == True:
             dem_res = 3
             found_res = True
