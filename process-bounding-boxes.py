@@ -107,6 +107,16 @@ def process_box(bbox_enum, overwrite=False, sinks="USGS"):
                     dem_res=dem_res,
                     sinkhole_dataset=sinks,
                 )
+                # If it fails, try 5 m
+                if (p_karst == -1) and (dem_res != 5):
+                    dem_res = 5
+                    p_karst, carbs_only_huc = calc_karstification_for_HU12(
+                        hu,
+                        boxname=box_dirname,
+                        dem_res=dem_res,
+                        sinkhole_dataset=sinks,
+                    )
+
                 p_karst_list.append(p_karst)
                 dem_res_list.append(dem_res)
                 carbs_only_huc_list.append(carbs_only_huc)
