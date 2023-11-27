@@ -85,7 +85,7 @@ def calc_karst_fraction(
             )
             carbs_only_df.to_file(carbs_only_file)
         else:
-            return 0
+            return 0, None
     else:
         wat_elev = dem_src.read()
         wat = wat_src.read()
