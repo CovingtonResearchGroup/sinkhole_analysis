@@ -72,7 +72,7 @@ def process_box(bbox_enum, overwrite=False, sinks="USGS"):
     if overwrite or not csv_exists:
         box_hucs12 = huc12.bybox(bbox)
         # Check available resolution
-        avail = py3dep.check_3dep_availability(bbox)
+        avail = py3dep.check_3dep_availability(box_hucs12.bounds)
         if avail["3m"] == True:
             dem_res = 3
             found_res = True
