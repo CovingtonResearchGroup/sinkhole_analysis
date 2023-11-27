@@ -109,6 +109,7 @@ def process_box(bbox_enum, overwrite=False, sinks="USGS"):
                 )
                 # If it fails, try 5 m
                 if (p_karst == -1) and (dem_res != 5):
+                    print("Trying 5 m DEM because first attempt failed.")
                     dem_res = 5
                     p_karst, carbs_only_huc = calc_karstification_for_HU12(
                         hu,
