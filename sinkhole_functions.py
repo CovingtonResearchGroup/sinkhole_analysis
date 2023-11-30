@@ -1,3 +1,4 @@
+import numpy as np
 import rasterio as rio
 from whitebox.whitebox_tools import WhiteboxTools
 import geopandas as gpd
@@ -90,7 +91,7 @@ def calc_karst_fraction(
         wat_elev = dem_src.read()
         wat = wat_src.read()
     nkarst = len(wat[wat > 0])
-    ntotal = len(wat_elev[wat_elev != ndv])
+    ntotal = len(wat_elev[~np.isnan(wat_elev)])
     # nfluvial = len(wat[wat < 0])
     nfluvial = ntotal - nkarst
     print("n karst draining pixels =", nkarst)
