@@ -12,6 +12,27 @@ import os
 from gis_functions import clip_raster_to_geometry, clip_shp_to_geometry
 from sinkhole_functions import calc_karst_fraction
 
+def get_carbs_only_huc(huc, datadir=None, demfile=None, ):
+    huc_geom = huc.geometry
+    huc_carbs = gpd.read_file(
+        "./USGS-Karst-Map/Dissolved_carbonates_seperate_polys_E_B3.shp",
+        mask=huc_geom,
+    )
+    if len(huc_carbs) > 0:
+        carbs_dissolved = huc_carbs.dissolve()
+        carbs_only_huc = huc_geom.intersection(carbs_dissolved.iloc[0].geometry)
+        carbs_only_df = gpd.GeoDataFrame(
+            {"geometry": [carbs_only_huc]}, crs=huc.crs
+        )
+        if datadir is not None:
+            carbs_only_file = os.path.join(
+                datadir, demfile.split("-")[0] + "-carbs_only_huc.shp"
+            )
+            carbs_only_df.to_file(carbs_only_file)
+        return carbs_only_huc
+    else:
+        return None
+
 
 def calc_karstification_for_HU12(
     HU12,
@@ -65,7 +86,7 @@ def calc_karstification_for_HU12(
                     failed = True
         if failed:
             print("Failed to retrieve the DEM after", str(max_tries), "tries.")
-            return -1, None
+            return -2, None
 
         dem.rio.to_raster(full_rasterfile_path)
     else:
@@ -104,7 +125,10 @@ def calc_karstification_for_HU12(
     sinks_list = huc_sinks[["geometry", "ID"]].values.tolist()
     if len(sinks_list) == 0:
         # no sinks in basin
-        return 0.0, None
+        rasterdir = os.path.abspath(rasterdir)
+
+        carbs_only_huc = get_carbs_only_huc(HU12, datadir=rasterdir, demfile=rasterfile)
+        return 0.0, carbs_only_huc
     else:
         out_shape = imgsrc_elev.shape
         out_trans = imgsrc_elev.transform

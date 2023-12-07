@@ -108,7 +108,7 @@ def process_box(bbox_enum, overwrite=False, sinks="USGS"):
                     sinkhole_dataset=sinks,
                 )
                 # If it fails, try 5 m
-                if (p_karst == -1) and (dem_res != 5):
+                if (p_karst == -2) and (dem_res != 5):
                     print("Trying 5 m DEM because first attempt failed.")
                     dem_res = 5
                     p_karst, carbs_only_huc = calc_karstification_for_HU12(
@@ -131,7 +131,7 @@ def process_box(bbox_enum, overwrite=False, sinks="USGS"):
 
         else:
             print("No dem available at required resolutions.")
-            p_karst_list.append(-1)
+            p_karst_list.append(-3)
             dem_res_list.append(-1)
             carbs_only_huc_list.append("POINT EMPTY")
 
