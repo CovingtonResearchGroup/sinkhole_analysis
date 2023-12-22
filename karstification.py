@@ -10,7 +10,7 @@ import glob
 
 import os
 from gis_functions import clip_raster_to_geometry, clip_shp_to_geometry
-from sinkhole_functions import calc_karst_fraction
+from sinkhole_functions import calc_karst_fraction, get_carbs_only_huc
 
 
 def calc_karstification_for_HU12(
@@ -65,7 +65,7 @@ def calc_karstification_for_HU12(
                     failed = True
         if failed:
             print("Failed to retrieve the DEM after", str(max_tries), "tries.")
-            return -1, None
+            return -2, None
 
         dem.rio.to_raster(full_rasterfile_path)
     else:
@@ -104,7 +104,10 @@ def calc_karstification_for_HU12(
     sinks_list = huc_sinks[["geometry", "ID"]].values.tolist()
     if len(sinks_list) == 0:
         # no sinks in basin
-        return 0.0, None
+        rasterdir = os.path.abspath(rasterdir)
+
+        carbs_only_huc = get_carbs_only_huc(HU12, datadir=rasterdir, demfile=rasterfile)
+        return 0.0, carbs_only_huc
     else:
         out_shape = imgsrc_elev.shape
         out_trans = imgsrc_elev.transform
