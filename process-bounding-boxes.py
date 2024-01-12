@@ -71,7 +71,9 @@ def process_box(bbox_enum, overwrite=False, sinks="USGS"):
 
     if overwrite or not csv_exists:
         box_hucs12 = huc12.bybox(bbox)
+        # Commented out this section on 1/12/24 to try using 10 m for everything
         # Check available resolution
+        """
         avail = py3dep.check_3dep_availability(tuple(box_hucs12.total_bounds))
         if avail["3m"] == True:
             dem_res = 3
@@ -84,6 +86,9 @@ def process_box(bbox_enum, overwrite=False, sinks="USGS"):
             found_res = True
         else:
             found_res = False
+        """
+        found_res = True
+        dem_res = 10
         if found_res:
             print("Using dem resolution", str(dem_res))
             box_poly = box(*bbox)
@@ -107,6 +112,7 @@ def process_box(bbox_enum, overwrite=False, sinks="USGS"):
                     dem_res=dem_res,
                     sinkhole_dataset=sinks,
                 )
+                """
                 # If it fails, try 5 m
                 if (p_karst == -2) and (dem_res != 5):
                     print("Trying 5 m DEM because first attempt failed.")
@@ -117,7 +123,7 @@ def process_box(bbox_enum, overwrite=False, sinks="USGS"):
                         dem_res=dem_res,
                         sinkhole_dataset=sinks,
                     )
-
+                """
                 p_karst_list.append(p_karst)
                 dem_res_list.append(dem_res)
                 carbs_only_huc_list.append(carbs_only_huc)
