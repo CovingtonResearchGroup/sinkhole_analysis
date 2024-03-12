@@ -13,6 +13,7 @@ if not os.path.exists(rasterdir):
 
 hucs_completed = []
 hucs_failed = []
+hucs_already_present = []
 
 for idx, row in hucs_on_carbs_with_sinks.iterrows():
     huc12_str = row.huc12
@@ -36,7 +37,6 @@ for idx, row in hucs_on_carbs_with_sinks.iterrows():
                 dem = dem.rio.reproject(5070)
                 dem.rio.to_raster(full_rasterfile_path)
                 hucs_completed.append(huc12_str)
-                print("this huc ", huc12_str)
             except Exception as error:
                 print("Failed to retrieve DEM for", huc12_str + ".")
                 print("error:", error)
@@ -57,15 +57,23 @@ for idx, row in hucs_on_carbs_with_sinks.iterrows():
             rasterfile,
             " continuing without download.",
         )
+        hucs_already_present.append(huc12_str)
 
-print(hucs_completed)
 
 completed_file = os.path.join(rasterdir, "completed_dems.txt")
 with open(completed_file, "w") as f:
     for huc in hucs_completed:
         f.write("%s\n" % huc)
-print(hucs_completed)
+print("Hucs completed =", hucs_completed)
+
 failed_file = os.path.join(rasterdir, "failed_dems.txt")
 with open(failed_file, "w") as f:
     for huc in hucs_failed:
         f.write("%s\n" % huc)
+print("Hucs failed =", hucs_failed)
+
+already_file = os.path.join(rasterdir, "already_downloaded_dems.txt")
+with open(already_file, "w") as f:
+    for huc in hucs_already_present:
+        f.write("%s\n" % huc)
+print("Hucs already present =", hucs_failed)
