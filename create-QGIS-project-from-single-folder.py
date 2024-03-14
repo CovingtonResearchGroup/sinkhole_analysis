@@ -57,7 +57,7 @@ def create_project(sinks_tag="Combined"):
 
     karst_group = root.addGroup("USGS Karst Map")
     karst_layer = QgsVectorLayer(
-        "./USGS-Karst-Map/Carbonates48.shp", "Carbonates 48", "ogr"
+        "../USGS-Karst-Map/Carbonates48.shp", "Carbonates 48", "ogr"
     )
     project.addMapLayer(karst_layer, False)
     rock_type = karst_layer.fields().lookupField("ROCKTYPE1")
