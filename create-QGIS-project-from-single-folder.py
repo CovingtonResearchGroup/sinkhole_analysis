@@ -34,7 +34,7 @@ def create_project(sinks_tag="Combined"):
     catchment_group = root.addGroup("Catchments")
 
     catchment_tifs = glob.glob("carb_huc_dems/catchments/*.tif/")
-
+    print("catchment tifs =", catchment_tifs)
     for raster_path in catchment_tifs:
         huc_num = raster_path.split("/")[-1].split("-")[0]
         print("raster_path=", raster_path)
