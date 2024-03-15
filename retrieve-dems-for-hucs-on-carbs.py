@@ -76,4 +76,4 @@ already_file = os.path.join(rasterdir, "already_downloaded_dems.txt")
 with open(already_file, "w") as f:
     for huc in hucs_already_present:
         f.write("%s\n" % huc)
-print("Hucs already present =", hucs_failed)
+print("Hucs already present =", hucs_already_present)
