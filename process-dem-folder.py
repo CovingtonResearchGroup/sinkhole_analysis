@@ -134,6 +134,8 @@ def process_dem(dem_file, overwrite=False, sinks="Combined"):
             with open(p_karst_file, "wb") as pf:
                 pickle.dump(p_karst_dict, pf)
             return
+    else:
+        print("P karst file for ", huc12_str, " already exists. Moving to next file.")
 
 
 if __name__ == "__main__":
