@@ -1,6 +1,5 @@
 import os
 import re
-import json
 import sys
 import string
 import warnings
@@ -39,7 +38,7 @@ def process_dem(dem_file, overwrite=False, sinks="Combined"):
     basefilename = huc12_str + "-" + sinks
 
     # Check if catchments file already exists
-    p_karst_file = os.path.join(rasterdir, huc12_str + "-p_karst.txt")
+    p_karst_file = os.path.join(rasterdir, huc12_str + "-p_karst.pkl")
     p_karst_file_exists = os.path.exists(p_karst_file)
     if overwrite or not p_karst_file_exists:
 
@@ -95,8 +94,8 @@ def process_dem(dem_file, overwrite=False, sinks="Combined"):
                 "huc12": huc12_str,
             }
 
-            with open(p_karst_file, "w") as pf:
-                pf.write(json.dumps(p_karst_dict))
+            with open(p_karst_file, "wb") as pf:
+                pickle.dump(p_karst_dict, pf)
 
             return
         else:
@@ -132,8 +131,8 @@ def process_dem(dem_file, overwrite=False, sinks="Combined"):
                 "carbs_huc": carbs_only_huc,
                 "huc12": huc12_str,
             }
-            with open(p_karst_file, "w") as pf:
-                pf.write(json.dumps(p_karst_dict))
+            with open(p_karst_file, "wb") as pf:
+                pickle.dump(p_karst_dict, pf)
             return
 
 
@@ -172,11 +171,11 @@ if __name__ == "__main__":
         process_dem_wopts = partial(process_dem, overwrite=overwrite, sinks=sinks)
         pool.map(process_dem_wopts, dem_files)
 
-    p_karst_files = glob.glob("carb_huc_dems/*-p_karst.txt")
+    p_karst_files = glob.glob("carb_huc_dems/*-p_karst.pkl")
     p_karst_dict_list = []
     for p_karst_file in p_karst_files:
-        with open(p_karst_file) as pf:
-            this_dict = json.load(pf)
+        with open(p_karst_file, "rb") as pf:
+            this_dict = pickle.load(pf)
         p_karst_dict_list.append(this_dict)
 
     for this_dict in p_karst_dict_list:
