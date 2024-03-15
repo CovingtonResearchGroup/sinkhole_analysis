@@ -167,7 +167,7 @@ if __name__ == "__main__":
         if re.search(r"[\d]{12}-3DEP.tif", f)
     ]
 
-    with multiprocessing.Pool(processes=n_processes, maxtasksperchild=20) as pool:
+    with multiprocessing.Pool(processes=n_processes, maxtasksperchild=10) as pool:
         process_dem_wopts = partial(process_dem, overwrite=overwrite, sinks=sinks)
         pool.map(process_dem_wopts, dem_files)
 
