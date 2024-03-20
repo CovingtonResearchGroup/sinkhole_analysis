@@ -37,7 +37,7 @@ def create_project(sinks_tag="Combined"):
         "./combined-sinkholes/combined-sinkhole-datasets-5070.shp", "Sinks", "ogr"
     )
     project.addMapLayer(sinks_layer, False)
-    symbol = QgsFillSymbol.createSimple({"color": "white"})
+    symbol = QgsFillSymbol.createSimple({"color": "#FFFFFF"})
     renderer = QgsSingleSymbolRenderer(symbol)
     sinks_layer.setRenderer(renderer)
     sinks_layer.triggerRepaint()
