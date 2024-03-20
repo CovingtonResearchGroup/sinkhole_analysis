@@ -11,6 +11,7 @@ from qgis.core import (
     QgsRendererCategory,
     QgsStyle,
     QgsCategorizedSymbolRenderer,
+    QgsFillSymbol,
 )
 import glob
 import os
@@ -29,6 +30,17 @@ def create_project(sinks_tag="Combined"):
     project.setCrs(crs)
 
     root = project.layerTreeRoot()
+
+    sinks_group = root.addGroup("Sinks")
+    sinks_layer = QgsVectorLayer(
+        "./combined-sinkholes/combined-sinkhole-datasets-5070.shp", "Sinks", "ogr"
+    )
+    project.addMapLayer(sinks_layer, False)
+    symbol = QgsFillSymbol.createSimple({"color": "white"})
+    sinks_layer.renderer().setSymbol(symbol)
+    sinks_layer.triggerRepaint()
+    sinks_group.addLayer(sinks_layer)
+    sinks_group.setExpanded(False)
 
     # root.insertLayer(2, WMSLayer)
     catchment_group = root.addGroup("Catchments")
@@ -50,7 +62,7 @@ def create_project(sinks_tag="Combined"):
     catchment_layer.setRenderer(renderer)
     catchment_layer.triggerRepaint()
 
-    catchment_layer.setOpacity(0.5)
+    catchment_layer.setOpacity(0.3)
 
     catchment_group.addLayer(catchment_layer)
     catchment_group.setExpanded(False)
