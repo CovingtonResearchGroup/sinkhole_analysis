@@ -13,7 +13,6 @@ from qgis.core import (
     QgsCategorizedSymbolRenderer,
     QgsFillSymbol,
     QgsSingleSymbolRenderer,
-    QgsSimpleFillSymbolLayer,
 )
 import glob
 import os
@@ -38,10 +37,10 @@ def create_project(sinks_tag="Combined"):
         "./combined-sinkholes/combined-sinkhole-datasets-5070.shp", "Sinks", "ogr"
     )
     project.addMapLayer(sinks_layer, False)
-    symbol_layer = QgsSimpleFillSymbolLayer.create({"color": "#FFFFFF"})
-    # renderer = QgsSingleSymbolRenderer(symbol)
-    sinks_layer.renderer().symbols()[0].changeSymbolLayer(0, symbol_layer)
-    # sinks_layer.setRenderer(renderer)
+    symbol = QgsFillSymbol.createSimple({"color": "#FFFFFF"})
+    renderer = QgsSingleSymbolRenderer(symbol)
+
+    sinks_layer.setRenderer(renderer)
 
     sinks_layer.setOpacity(0.5)
 
@@ -73,6 +72,13 @@ def create_project(sinks_tag="Combined"):
 
     catchment_group.addLayer(catchment_layer)
     catchment_group.setExpanded(False)
+
+    """
+    p_karst_layer = QgsVectorLayer("./carb_huc_dems/processsed_hucs.shp", 
+                                   "Carbonate HUCs", 
+                                   "ogr")
+    project.addMapLayer(p_karst_layer, False)
+    """
 
     karst_group = root.addGroup("USGS Karst Map")
     karst_layer = QgsVectorLayer(
