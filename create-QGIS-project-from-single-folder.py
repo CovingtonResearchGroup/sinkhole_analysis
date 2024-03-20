@@ -12,6 +12,7 @@ from qgis.core import (
     QgsStyle,
     QgsCategorizedSymbolRenderer,
     QgsFillSymbol,
+    QgsSingleSymbolRenderer,
 )
 import glob
 import os
@@ -37,7 +38,8 @@ def create_project(sinks_tag="Combined"):
     )
     project.addMapLayer(sinks_layer, False)
     symbol = QgsFillSymbol.createSimple({"color": "white"})
-    sinks_layer.renderer().setSymbol(symbol)
+    renderer = QgsSingleSymbolRenderer(symbol)
+    sinks_layer.setRenderer(renderer)
     sinks_layer.triggerRepaint()
     sinks_group.addLayer(sinks_layer)
     sinks_group.setExpanded(False)
