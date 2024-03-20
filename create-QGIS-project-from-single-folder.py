@@ -32,32 +32,32 @@ def create_project(sinks_tag="Combined"):
 
     # root.insertLayer(2, WMSLayer)
     catchment_group = root.addGroup("Catchments")
+    catchment_layer = QgsVectorLayer(
+        "./carb_huc_dems/catchments/merged_catchments.gpkg", "Catchments", "ogr"
+    )
+    project.addMapLayer(catchment_layer, False)
+    raster_val = catchment_layer.fields().lookupField("raster_val")
+    unique_values = catchment_layer.uniqueValues(raster_val)
 
-    catchment_tifs = glob.glob("carb_huc_dems/catchments/*.tif")
-    # print("catchment tifs =", catchment_tifs)
-    for raster_path in catchment_tifs:
-        huc_num = raster_path.split("/")[-1].split("-")[0]
-        print("raster_path=", raster_path)
-        if os.path.exists(raster_path):
-            rasterLayer = QgsRasterLayer(
-                raster_path, "Sinkhole basins " + huc_num, "gdal"
-            )
-            project.addMapLayer(rasterLayer, False)
-            catchment_group.addLayer(rasterLayer)
-            classes = QgsPalettedRasterRenderer.classDataFromRaster(
-                rasterLayer.dataProvider(), 1, QgsRandomColorRamp()
-            )
-            paletted_renderer = QgsPalettedRasterRenderer(
-                rasterLayer.dataProvider(), 1, classes
-            )
-            rasterLayer.setRenderer(paletted_renderer)
-            rasterLayer.setOpacity(0.3)
+    categories = []
+    for value in unique_values:
+        symbol = QgsSymbol.defaultSymbol(catchment_layer.geometryType())
+        category = QgsRendererCategory(value, symbol, str(value))
+        categories.append(category)
 
+    renderer = QgsCategorizedSymbolRenderer("raster_val", categories)
+    renderer.updateColorRamp(QgsRandomColorRamp())
+    catchment_layer.setRenderer(renderer)
+    catchment_layer.triggerRepaint()
+
+    catchment_layer.setOpacity(0.5)
+
+    catchment_group.addLayer(catchment_layer)
     catchment_group.setExpanded(False)
 
     karst_group = root.addGroup("USGS Karst Map")
     karst_layer = QgsVectorLayer(
-        "../USGS-Karst-Map/Carbonates48.shp", "Carbonates 48", "ogr"
+        "./USGS-Karst-Map/Carbonates48.shp", "Carbonates 48", "ogr"
     )
     project.addMapLayer(karst_layer, False)
     rock_type = karst_layer.fields().lookupField("ROCKTYPE1")
