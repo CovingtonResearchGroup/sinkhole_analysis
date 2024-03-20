@@ -34,7 +34,7 @@ def create_project(sinks_tag="Combined"):
 
     sinks_group = root.addGroup("Sinks")
     sinks_layer = QgsVectorLayer(
-        "./combined-sinkholes/combined-sinkhole-datasets-5070.shp", "Sinks", "ogr"
+        "../combined-sinkholes/combined-sinkhole-datasets-5070.shp", "Sinks", "ogr"
     )
     project.addMapLayer(sinks_layer, False)
     symbol = QgsFillSymbol.createSimple({"color": "#FFFFFF"})
@@ -82,7 +82,7 @@ def create_project(sinks_tag="Combined"):
 
     karst_group = root.addGroup("USGS Karst Map")
     karst_layer = QgsVectorLayer(
-        "./USGS-Karst-Map/Carbonates48.shp", "Carbonates 48", "ogr"
+        "../USGS-Karst-Map/Carbonates48.shp", "Carbonates 48", "ogr"
     )
     project.addMapLayer(karst_layer, False)
     rock_type = karst_layer.fields().lookupField("ROCKTYPE1")
