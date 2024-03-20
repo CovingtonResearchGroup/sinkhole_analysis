@@ -13,6 +13,7 @@ from qgis.core import (
     QgsCategorizedSymbolRenderer,
     QgsFillSymbol,
     QgsSingleSymbolRenderer,
+    QgsSimpleFillSymbolLayer,
 )
 import glob
 import os
@@ -37,9 +38,13 @@ def create_project(sinks_tag="Combined"):
         "./combined-sinkholes/combined-sinkhole-datasets-5070.shp", "Sinks", "ogr"
     )
     project.addMapLayer(sinks_layer, False)
-    symbol = QgsFillSymbol.createSimple({"color": "#FFFFFF"})
-    renderer = QgsSingleSymbolRenderer(symbol)
-    sinks_layer.setRenderer(renderer)
+    symbol_layer = QgsSimpleFillSymbolLayer.create({"color": "#FFFFFF"})
+    # renderer = QgsSingleSymbolRenderer(symbol)
+    sinks_layer.renderer().symbols()[0].changeSymbolLayer(0, symbol_layer)
+    # sinks_layer.setRenderer(renderer)
+
+    sinks_layer.setOpacity(0.5)
+
     sinks_layer.triggerRepaint()
     sinks_group.addLayer(sinks_layer)
     sinks_group.setExpanded(False)
