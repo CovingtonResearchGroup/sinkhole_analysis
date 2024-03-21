@@ -3,12 +3,17 @@
 qgis/
 cache/
 PR/
+carb_huc_dems/
+share/
+huc12
 *.shp 
 *.shx 
 *.prj 
 *.dbf 
 *.cpg 
 *.csv 
+sinkhole-merging.qgz
+US-Karstification.zip
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
