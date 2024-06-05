@@ -2,7 +2,8 @@ import os
 import geopandas as gpd
 import py3dep
 
-hucs_on_carbs_with_sinks = gpd.read_file("huc12_on_carbs_with_sinks.shp")
+# hucs_on_carbs_with_sinks = gpd.read_file("huc12_on_carbs_with_sinks.shp")
+hucs_on_carbs = gpd.read_file("huc12_on_carbs.shp")
 
 max_tries = 3
 dem_res = 10
@@ -15,7 +16,8 @@ hucs_completed = []
 hucs_failed = []
 hucs_already_present = []
 
-for idx, row in hucs_on_carbs_with_sinks.iterrows():
+# for idx, row in hucs_on_carbs_with_sinks.iterrows():
+for idx, row in hucs_on_carbs.iterrows():
     huc12_str = row.huc12
     this_hu12 = row.geometry
     rasterfile = huc12_str + "-3DEP.tif"
