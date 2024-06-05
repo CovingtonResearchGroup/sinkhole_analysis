@@ -3,7 +3,7 @@ import geopandas as gpd
 import py3dep
 
 # hucs_on_carbs_with_sinks = gpd.read_file("huc12_on_carbs_with_sinks.shp")
-hucs_on_carbs = gpd.read_file("huc12_on_carbs.shp")
+hucs_on_carbs = gpd.read_file("huc12_on_carbs_no_big.shp")
 
 max_tries = 3
 dem_res = 10
