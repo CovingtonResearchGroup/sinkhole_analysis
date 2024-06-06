@@ -13,7 +13,6 @@ from functools import partial
 os.environ["USE_PYGEOS"] = "0"
 import geopandas as gpd
 import rasterio as rio
-import rasterio.mask as mask
 import rasterio.features
 import rasterio.plot as riop
 import py3dep
@@ -25,9 +24,10 @@ from gis_functions import clip_raster_to_geometry, clip_shp_to_geometry
 from sinkhole_functions import calc_karst_fraction, get_carbs_only_huc
 
 
-hucs_on_carbs_with_sinks = gpd.read_file("huc12_on_carbs_with_sinks.shp")
+# hucs_on_carbs = gpd.read_file("huc12_on_carbs_with_sinks.shp")
+hucs_on_carbs = gpd.read_file("hucs_on_carbs_no_big.shp")
 analysis_crs = "5070"
-hucs_on_carbs_with_sinks.to_crs(analysis_crs, inplace=True)
+hucs_on_carbs.to_crs(analysis_crs, inplace=True)
 
 
 def process_dem(dem_file, overwrite=False, sinks="Combined"):
@@ -43,15 +43,13 @@ def process_dem(dem_file, overwrite=False, sinks="Combined"):
     if overwrite or not p_karst_file_exists:
 
         # Grab geometry for this huc
-        this_hu12 = hucs_on_carbs_with_sinks[
-            hucs_on_carbs_with_sinks.huc12 == huc12_str
-        ].geometry.values[0]
+        this_hu12 = hucs_on_carbs[hucs_on_carbs.huc12 == huc12_str].geometry.values[0]
 
         imgsrc_elev = rio.open(dem_file)
-        if not imgsrc_elev.crs == hucs_on_carbs_with_sinks.crs:
+        if not imgsrc_elev.crs == hucs_on_carbs.crs:
             print("CRS for dem and hucs dataframe do not match!")
             print("DEM:", imgsrc_elev.crs)
-            print("DF:", hucs_on_carbs_with_sinks.crs)
+            print("DF:", hucs_on_carbs.crs)
             return -1
 
         if sinks == "USGS":
@@ -138,6 +136,38 @@ def process_dem(dem_file, overwrite=False, sinks="Combined"):
         print("P karst file for ", huc12_str, " already exists. Moving to next file.")
 
 
+def main(
+    n_processes=4,
+    sinks="Combined",
+    overwrite=False,
+    dem_dir="carb_huc_dems",
+):
+
+    dem_path = os.path.join(dem_dir, "*.tif")
+    dem_files = [f for f in glob.glob(dem_path) if re.search(r"[\d]{12}-3DEP.tif", f)]
+
+    with multiprocessing.Pool(processes=n_processes, maxtasksperchild=10) as pool:
+        process_dem_wopts = partial(process_dem, overwrite=overwrite, sinks=sinks)
+        pool.map(process_dem_wopts, dem_files)
+
+    p_karst_path = os.path.join(dem_dir, "*-p_karst.pkl")
+    p_karst_files = glob.glob(p_karst_path)
+    p_karst_dict_list = []
+    for p_karst_file in p_karst_files:
+        with open(p_karst_file, "rb") as pf:
+            this_dict = pickle.load(pf)
+        p_karst_dict_list.append(this_dict)
+
+    for this_dict in p_karst_dict_list:
+        huc12_str = this_dict["huc12"]
+        wantidx = hucs_on_carbs.index[hucs_on_carbs.huc12 == huc12_str]
+        hucs_on_carbs.loc[wantidx, "p_karst"] = this_dict["p_karst"]
+        hucs_on_carbs.loc[wantidx, "geometry"] = this_dict["carbs_huc"]
+
+    output_path = os.path.join(dem_dir, "processed_hucs.shp")
+    hucs_on_carbs.to_file(output_path)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -149,7 +179,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-s",
         "--sinks",
-        help="Which sinks shapefile to use (default=USGS).",
+        help="Which sinks shapefile to use (default=Combined).",
         choices=["USGS", "Mihevc", "Combined"],
         default="Combined",
     )
@@ -158,34 +188,19 @@ if __name__ == "__main__":
         action="store_true",
         help="If flag is set, then box directories with existing csv files will be rerun and overwritten.",
     )
+
+    parser.add_argument(
+        "-d",
+        "--dir",
+        help="Name of directory containing dems.",
+        default="carb_huc_dems",
+    )
     args = parser.parse_args()
     n_processes = int(args.ncpus)
     sinks = args.sinks
     overwrite = args.overwrite
+    dem_dir = args.dir
 
-    dem_files = [
-        f
-        for f in glob.glob("carb_huc_dems/*.tif")
-        if re.search(r"[\d]{12}-3DEP.tif", f)
-    ]
-
-    with multiprocessing.Pool(processes=n_processes, maxtasksperchild=10) as pool:
-        process_dem_wopts = partial(process_dem, overwrite=overwrite, sinks=sinks)
-        pool.map(process_dem_wopts, dem_files)
-
-    p_karst_files = glob.glob("carb_huc_dems/*-p_karst.pkl")
-    p_karst_dict_list = []
-    for p_karst_file in p_karst_files:
-        with open(p_karst_file, "rb") as pf:
-            this_dict = pickle.load(pf)
-        p_karst_dict_list.append(this_dict)
-
-    for this_dict in p_karst_dict_list:
-        huc12_str = this_dict["huc12"]
-        wantidx = hucs_on_carbs_with_sinks.index[
-            hucs_on_carbs_with_sinks.huc12 == huc12_str
-        ]
-        hucs_on_carbs_with_sinks.loc[wantidx, "p_karst"] = this_dict["p_karst"]
-        hucs_on_carbs_with_sinks.loc[wantidx, "geometry"] = this_dict["carbs_huc"]
-
-    hucs_on_carbs_with_sinks.to_file("carb_huc_dems/processed_hucs.shp")
+    sys.exit(
+        main(n_processes=n_processes, sinks=sinks, overwrite=overwrite, dem_dir=dem_dir)
+    )
