@@ -125,7 +125,7 @@ def create_project(sinks_tag="Combined", out_dir=None, dem_dir=None, overwrite=F
     num_classes = 10
     class_meth = QgsClassificationJenks()
     default_style = QgsStyle().defaultStyle()
-    color_ramp = default_style.ColorRamp("Spectral").invert()
+    color_ramp = default_style.colorRamp("Spectral").invert()
     renderer = QgsGraduatedSymbolRenderer()
     renderer.setClassAttribute("p_karst")
     renderer.setClassificationMethod(class_meth)
