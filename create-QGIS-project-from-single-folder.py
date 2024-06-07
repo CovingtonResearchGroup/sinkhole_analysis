@@ -120,7 +120,8 @@ def create_project(sinks_tag="Combined", out_dir=None, dem_dir=None, overwrite=F
     )
     p_karst_layer.setOpacity(0.5)
     # project.addMapLayer(p_karst_layer, False)
-    root.addLayer(p_karst_layer)
+    # root.addLayer(p_karst_layer)
+    root.addMapLayer(p_karst_layer, False)
 
     karst_group = root.addGroup("USGS Karst Map")
     karst_layer = QgsVectorLayer(
@@ -151,7 +152,8 @@ def create_project(sinks_tag="Combined", out_dir=None, dem_dir=None, overwrite=F
     )
     states_layer.setOpacity(0.5)
     # project.addMapLayer(states_layer, False)
-    root.addLayer(states_layer)
+    # root.addLayer(states_layer)
+    root.addMapLayer(states_layer, False)
 
     dem_group = root.addGroup("Hillshade")
     url_with_params = "contextualWMSLegend=0&crs=EPSG:4326&dpiMode=7&featureCount=10&format=image/tiff&layers=3DEPElevation:Hillshade%20Gray&styles&url=https://elevation.nationalmap.gov/arcgis/services/3DEPElevation/ImageServer/WMSServer"
