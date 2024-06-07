@@ -1,6 +1,5 @@
 import geopandas as gpd
 import rasterio as rio
-import rasterio.mask as mask
 import rasterio.features
 import rasterio.plot as riop
 import py3dep
