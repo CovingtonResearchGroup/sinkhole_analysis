@@ -40,15 +40,22 @@ def create_project(sinks_tag="Combined", out_dir=None, dem_dir=None, overwrite=F
 
     os.makedirs(out_dir, exist_ok=True)
     # Create subfolders for layers
-    karst_dir = os.path.join(out_dir, "karst-map")
-    misc_dir = os.path.join(out_dir, "misc")
-    sinks_dir = os.path.join(out_dir, "sinks")
-    analysis_dir = os.path.join(out_dir, "analysis-layers")
+    karst_dir = os.path.join(out_dir, "karst-map/")
+    print("karst_dir=", karst_dir)
+    os.makedirs(karst_dir)
+    misc_dir = os.path.join(out_dir, "misc/")
+    os.makedirs(misc_dir)
+    sinks_dir = os.path.join(out_dir, "sinks/")
+    os.makedirs(sinks_dir)
+    analysis_dir = os.path.join(out_dir, "analysis-layers/")
+    os.makedirs(analysis_dir)
 
     # Copy GIS layer files into their folders
     for file in glob.glob(r"./combined-sinkholes/combined-sinkhole-datasets-5070.*"):
+        print(file, sinks_dir)
         shutil.copy(file, sinks_dir)
     for file in glob.glob(r"./USGS-Karst-Map/Carbonates48.*"):
+        print(file, karst_dir)
         shutil.copy(file, karst_dir)
     for file in glob.glob(r"./misc/*"):
         shutil.copy(file, misc_dir)
