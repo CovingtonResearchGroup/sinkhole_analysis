@@ -51,7 +51,7 @@ def create_project(sinks_tag="Combined", out_dir=None, dem_dir=None, overwrite=F
     os.makedirs(analysis_dir)
 
     # Copy GIS layer files into their folders
-    for file in glob.glob(r"./combined-sinkholes/combined-sinkhole-datasets-5070.*"):
+    for file in glob.glob(r"./combined-sinkholes/combined-sinkholes-dissolved-5070.*"):
         print(file, sinks_dir)
         shutil.copy(file, sinks_dir)
     for file in glob.glob(r"./USGS-Karst-Map/Carbonates48.*"):
@@ -60,7 +60,7 @@ def create_project(sinks_tag="Combined", out_dir=None, dem_dir=None, overwrite=F
     for file in glob.glob(r"./misc/*"):
         shutil.copy(file, misc_dir)
     shutil.copy("./carb_huc_dems/merged_catchments.gpkg", analysis_dir)
-    for file in glob.glob(r"./carb_huc_dems/processsed_hucs.*"):
+    for file in glob.glob(r"./carb_huc_dems/processed_hucs.*"):
         shutil.copy(file, analysis_dir)
 
     QgsApplication.setPrefixPath("/home/mcoving/mambaforge/envs/geo/bin/qgis", True)
