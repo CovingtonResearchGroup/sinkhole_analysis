@@ -74,7 +74,7 @@ def create_project(sinks_tag="Combined", out_dir=None, dem_dir=None, overwrite=F
 
     sinks_group = root.addGroup("Sinks")
     sinks_layer = QgsVectorLayer(
-        os.path.join(sinks_dir, "combined-sinkhole-datasets-5070.shp"), "Sinks", "ogr"
+        os.path.join(sinks_dir, "combined-sinkholes-dissolved-5070.shp"), "Sinks", "ogr"
     )
     project.addMapLayer(sinks_layer, False)
     symbol = QgsFillSymbol.createSimple({"color": "#FFFFFF"})
@@ -114,7 +114,7 @@ def create_project(sinks_tag="Combined", out_dir=None, dem_dir=None, overwrite=F
     catchment_group.setExpanded(False)
 
     p_karst_layer = QgsVectorLayer(
-        os.path.join("./analysis-layers", "processsed_hucs.shp"),
+        os.path.join(analysis_dir, "processed_hucs.shp"),
         "Carbonate HUCs",
         "ogr",
     )
@@ -123,7 +123,7 @@ def create_project(sinks_tag="Combined", out_dir=None, dem_dir=None, overwrite=F
 
     karst_group = root.addGroup("USGS Karst Map")
     karst_layer = QgsVectorLayer(
-        os.path.join("./karst-map/", "Carbonates48.shp"), "Carbonates 48", "ogr"
+        os.path.join(karst_dir, "Carbonates48.shp"), "Carbonates 48", "ogr"
     )
     project.addMapLayer(karst_layer, False)
     rock_type = karst_layer.fields().lookupField("ROCKTYPE1")
@@ -146,7 +146,7 @@ def create_project(sinks_tag="Combined", out_dir=None, dem_dir=None, overwrite=F
     karst_group.setExpanded(False)
 
     states_layer = QgsVectorLayer(
-        os.path.join("./misc/", "cb_2018_us_state_500k.shp"), "US States", "ogr"
+        os.path.join(misc_dir, "cb_2018_us_state_500k.shp"), "US States", "ogr"
     )
     states_layer.setOpacity(0.5)
     project.addMapLayer(states_layer, False)
