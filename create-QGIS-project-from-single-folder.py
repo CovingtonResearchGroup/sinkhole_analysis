@@ -124,7 +124,7 @@ def create_project(sinks_tag="Combined", out_dir=None, dem_dir=None, overwrite=F
     project.addMapLayer(p_karst_layer, False)
     num_classes = 10
     class_meth = QgsClassificationJenks()
-    default_style = QgsStyle().default_style()
+    default_style = QgsStyle().defaultStyle()
     color_ramp = default_style.ColorRamp("Spectral").invert()
     renderer = QgsGraduatedSymbolRenderer()
     renderer.setClassAttribute("p_karst")
