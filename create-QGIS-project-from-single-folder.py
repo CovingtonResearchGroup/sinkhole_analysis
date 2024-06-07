@@ -41,7 +41,6 @@ def create_project(sinks_tag="Combined", out_dir=None, dem_dir=None, overwrite=F
     os.makedirs(out_dir, exist_ok=True)
     # Create subfolders for layers
     karst_dir = os.path.join(out_dir, "karst-map/")
-    print("karst_dir=", karst_dir)
     os.makedirs(karst_dir)
     misc_dir = os.path.join(out_dir, "misc/")
     os.makedirs(misc_dir)
@@ -52,10 +51,8 @@ def create_project(sinks_tag="Combined", out_dir=None, dem_dir=None, overwrite=F
 
     # Copy GIS layer files into their folders
     for file in glob.glob(r"./combined-sinkholes/combined-sinkholes-dissolved-5070.*"):
-        print(file, sinks_dir)
         shutil.copy(file, sinks_dir)
     for file in glob.glob(r"./USGS-Karst-Map/Carbonates48.*"):
-        print(file, karst_dir)
         shutil.copy(file, karst_dir)
     for file in glob.glob(r"./misc/*"):
         shutil.copy(file, misc_dir)
@@ -117,14 +114,16 @@ def create_project(sinks_tag="Combined", out_dir=None, dem_dir=None, overwrite=F
     catchment_group.setExpanded(False)
 
     p_karst_layer = QgsVectorLayer(
-        os.path.join(analysis_dir, "processsed_hucs.shp"), "Carbonate HUCs", "ogr"
+        os.path.join("./analysis-layers", "processsed_hucs.shp"),
+        "Carbonate HUCs",
+        "ogr",
     )
     p_karst_layer.setOpacity(0.5)
     project.addMapLayer(p_karst_layer, False)
 
     karst_group = root.addGroup("USGS Karst Map")
     karst_layer = QgsVectorLayer(
-        os.path.join(karst_dir, "Carbonates48.shp"), "Carbonates 48", "ogr"
+        os.path.join("./karst-map/", "Carbonates48.shp"), "Carbonates 48", "ogr"
     )
     project.addMapLayer(karst_layer, False)
     rock_type = karst_layer.fields().lookupField("ROCKTYPE1")
@@ -147,7 +146,7 @@ def create_project(sinks_tag="Combined", out_dir=None, dem_dir=None, overwrite=F
     karst_group.setExpanded(False)
 
     states_layer = QgsVectorLayer(
-        os.path.join(misc_dir, "cb_2018_us_state_500k.shp"), "US States", "ogr"
+        os.path.join("./misc/", "cb_2018_us_state_500k.shp"), "US States", "ogr"
     )
     states_layer.setOpacity(0.5)
     project.addMapLayer(states_layer, False)
