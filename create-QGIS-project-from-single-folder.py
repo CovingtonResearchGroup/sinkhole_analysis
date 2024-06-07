@@ -21,23 +21,29 @@ import argparse
 import shutil
 import click
 
+
 def create_project(sinks_tag="Combined", out_dir=None, dem_dir=None, overwrite=False):
     full_path = os.path.abspath(out_dir)
     if os.path.isdir(out_dir):
         if overwrite:
-            if click.confirm('Do you really want to delete: '+full_path, default=False)
+            if click.confirm(
+                "Do you really want to delete: " + full_path, default=False
+            ):
                 shutil.rmtree(full_path)
             else:
-                print('Exiting from program because output directory contains files.')
+                print("Exiting from program because output directory contains files.")
         else:
-            print('Exiting from program because output directory exists and overwrite flag was not set. ' + full_path)
+            print(
+                "Exiting from program because output directory exists and overwrite flag was not set. "
+                + full_path
+            )
 
     os.makedirs(out_dir, exist_ok=True)
     # Create subfolders for layers
-    karst_dir = os.path.join(out_dir, 'karst-map')
-    misc_dir = os.path.join(out_dir, 'misc')
-    sinks_dir = os.path.join(out_dir, 'sinks')
-    analysis_dir = os.path.join(out_dir, 'analysis-layers')
+    karst_dir = os.path.join(out_dir, "karst-map")
+    misc_dir = os.path.join(out_dir, "misc")
+    sinks_dir = os.path.join(out_dir, "sinks")
+    analysis_dir = os.path.join(out_dir, "analysis-layers")
 
     # Copy GIS layer files into their folders
     for file in glob.glob(r"./combined-sinkholes/combined-sinkhole-datasets-5070.*"):
@@ -103,13 +109,11 @@ def create_project(sinks_tag="Combined", out_dir=None, dem_dir=None, overwrite=F
     catchment_group.addLayer(catchment_layer)
     catchment_group.setExpanded(False)
 
-    
-    p_karst_layer = QgsVectorLayer(os.path.join(analysis_dir, "processsed_hucs.shp"), 
-                                   "Carbonate HUCs", 
-                                   "ogr")
+    p_karst_layer = QgsVectorLayer(
+        os.path.join(analysis_dir, "processsed_hucs.shp"), "Carbonate HUCs", "ogr"
+    )
     p_karst_layer.setOpacity(0.5)
     project.addMapLayer(p_karst_layer, False)
-    
 
     karst_group = root.addGroup("USGS Karst Map")
     karst_layer = QgsVectorLayer(
@@ -135,13 +139,11 @@ def create_project(sinks_tag="Combined", out_dir=None, dem_dir=None, overwrite=F
     karst_group.addLayer(karst_layer)
     karst_group.setExpanded(False)
 
-
-    states_layer = QgsVectorLayer(os.path.join(misc_dir, "cb_2018_us_state_500k.shp"), 
-                                   "US States", 
-                                   "ogr")
+    states_layer = QgsVectorLayer(
+        os.path.join(misc_dir, "cb_2018_us_state_500k.shp"), "US States", "ogr"
+    )
     states_layer.setOpacity(0.5)
     project.addMapLayer(states_layer, False)
-    
 
     dem_group = root.addGroup("Hillshade")
     url_with_params = "contextualWMSLegend=0&crs=EPSG:4326&dpiMode=7&featureCount=10&format=image/tiff&layers=3DEPElevation:Hillshade%20Gray&styles&url=https://elevation.nationalmap.gov/arcgis/services/3DEPElevation/ImageServer/WMSServer"
