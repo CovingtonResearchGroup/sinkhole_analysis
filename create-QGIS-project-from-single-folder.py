@@ -113,15 +113,16 @@ def create_project(sinks_tag="Combined", out_dir=None, dem_dir=None, overwrite=F
     catchment_group.addLayer(catchment_layer)
     catchment_group.setExpanded(False)
 
+    hucs_group = root.addGroup("Carbonate hucs")
     p_karst_layer = QgsVectorLayer(
         os.path.join(analysis_dir, "processed_hucs.shp"),
         "Carbonate HUCs",
         "ogr",
     )
+    project.addMapLayer(p_karst_layer, False)
     p_karst_layer.setOpacity(0.5)
-    # project.addMapLayer(p_karst_layer, False)
-    # root.addLayer(p_karst_layer)
-    root.addMapLayer(p_karst_layer, False)
+    hucs_group.addLayer(p_karst_layer)
+    catchment_group.setExpanded(False)
 
     karst_group = root.addGroup("USGS Karst Map")
     karst_layer = QgsVectorLayer(
