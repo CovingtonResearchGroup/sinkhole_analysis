@@ -13,6 +13,8 @@ from qgis.core import (
     QgsCategorizedSymbolRenderer,
     QgsFillSymbol,
     QgsSingleSymbolRenderer,
+    QgsClassificationJenks,
+    QgsGraduatedSymbolRenderer,
 )
 import glob
 import os
@@ -120,7 +122,20 @@ def create_project(sinks_tag="Combined", out_dir=None, dem_dir=None, overwrite=F
         "ogr",
     )
     project.addMapLayer(p_karst_layer, False)
+    num_classes = 10
+    class_meth = QgsClassificationJenks()
+    default_style = QgsStyle().default_style()
+    color_ramp = default_style.ColorRamp("Spectral").invert()
+    renderer = QgsGraduatedSymbolRenderer()
+    renderer.setClassAttribute("p_karst")
+    renderer.setClassificationMethod(class_meth)
+    renderer.updateClasses(p_karst_layer, num_classes)
+    renderer.updateColorRamp(color_ramp)
+
+    p_karst_layer.setRenderer(renderer)
+    p_karst_layer.triggerRepaint()
     p_karst_layer.setOpacity(0.5)
+
     hucs_group.addLayer(p_karst_layer)
     catchment_group.setExpanded(False)
 
@@ -148,13 +163,14 @@ def create_project(sinks_tag="Combined", out_dir=None, dem_dir=None, overwrite=F
     karst_group.addLayer(karst_layer)
     karst_group.setExpanded(False)
 
+    misc_group = root.addGroup("Misc")
     states_layer = QgsVectorLayer(
         os.path.join(misc_dir, "cb_2018_us_state_500k.shp"), "US States", "ogr"
     )
-    states_layer.setOpacity(0.5)
-    # project.addMapLayer(states_layer, False)
-    # root.addLayer(states_layer)
-    root.addMapLayer(states_layer, False)
+    states_layer.setOpacity(0.3)
+    project.addMapLayer(states_layer, False)
+    misc_group.addLayer(states_layer)
+    misc_group.setExpanded(False)
 
     dem_group = root.addGroup("Hillshade")
     url_with_params = "contextualWMSLegend=0&crs=EPSG:4326&dpiMode=7&featureCount=10&format=image/tiff&layers=3DEPElevation:Hillshade%20Gray&styles&url=https://elevation.nationalmap.gov/arcgis/services/3DEPElevation/ImageServer/WMSServer"
