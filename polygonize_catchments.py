@@ -40,7 +40,7 @@ def polygonize_catchment_tif(tif_file):
 def merge_catchment_shps(catchment_dir):
     merged_gpkg = os.path.join(catchment_dir, "merged_catchments.gpkg")
     input_shps = os.path.join(catchment_dir, "*catchments.shp")
-    ogr_merge(["-single", "-f", "GPKG", "-o", merged_gpkg, input_shps])
+    ogr_merge(["-single", "-f", "GPKG", "-overwrite_ds", "-o", merged_gpkg, input_shps])
 
 
 if __name__ == "__main__":
