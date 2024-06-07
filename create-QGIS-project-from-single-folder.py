@@ -17,9 +17,39 @@ from qgis.core import (
 import glob
 import os
 import sys
+import argparse
+import shutil
+import click
 
+def create_project(sinks_tag="Combined", out_dir=None, dem_dir=None, overwrite=False):
+    full_path = os.path.abspath(out_dir)
+    if os.path.isdir(out_dir):
+        if overwrite:
+            if click.confirm('Do you really want to delete: '+full_path, default=False)
+                shutil.rmtree(full_path)
+            else:
+                print('Exiting from program because output directory contains files.')
+        else:
+            print('Exiting from program because output directory exists and overwrite flag was not set. ' + full_path)
 
-def create_project(sinks_tag="Combined"):
+    os.makedirs(out_dir, exist_ok=True)
+    # Create subfolders for layers
+    karst_dir = os.path.join(out_dir, 'karst-map')
+    misc_dir = os.path.join(out_dir, 'misc')
+    sinks_dir = os.path.join(out_dir, 'sinks')
+    analysis_dir = os.path.join(out_dir, 'analysis-layers')
+
+    # Copy GIS layer files into their folders
+    for file in glob.glob(r"./combined-sinkholes/combined-sinkhole-datasets-5070.*"):
+        shutil.copy(file, sinks_dir)
+    for file in glob.glob(r"./USGS-Karst-Map/Carbonates48.*"):
+        shutil.copy(file, karst_dir)
+    for file in glob.glob(r"./misc/*"):
+        shutil.copy(file, misc_dir)
+    shutil.copy("./carb_huc_dems/merged_catchments.gpkg", analysis_dir)
+    for file in glob.glob(r"./carb_huc_dems/processsed_hucs.*"):
+        shutil.copy(file, analysis_dir)
+
     QgsApplication.setPrefixPath("/home/mcoving/mambaforge/envs/geo/bin/qgis", True)
 
     qgs = QgsApplication([], False)
@@ -34,7 +64,7 @@ def create_project(sinks_tag="Combined"):
 
     sinks_group = root.addGroup("Sinks")
     sinks_layer = QgsVectorLayer(
-        "../combined-sinkholes/combined-sinkhole-datasets-5070.shp", "Sinks", "ogr"
+        os.path.join(sinks_dir, "combined-sinkhole-datasets-5070.shp"), "Sinks", "ogr"
     )
     project.addMapLayer(sinks_layer, False)
     symbol = QgsFillSymbol.createSimple({"color": "#FFFFFF"})
@@ -51,7 +81,7 @@ def create_project(sinks_tag="Combined"):
     # root.insertLayer(2, WMSLayer)
     catchment_group = root.addGroup("Catchments")
     catchment_layer = QgsVectorLayer(
-        "./carb_huc_dems/catchments/merged_catchments.gpkg", "Catchments", "ogr"
+        os.path.join(analysis_dir, "merged_catchments.gpkg"), "Catchments", "ogr"
     )
     project.addMapLayer(catchment_layer, False)
     raster_val = catchment_layer.fields().lookupField("raster_val")
@@ -73,16 +103,17 @@ def create_project(sinks_tag="Combined"):
     catchment_group.addLayer(catchment_layer)
     catchment_group.setExpanded(False)
 
-    """
-    p_karst_layer = QgsVectorLayer("./carb_huc_dems/processsed_hucs.shp", 
+    
+    p_karst_layer = QgsVectorLayer(os.path.join(analysis_dir, "processsed_hucs.shp"), 
                                    "Carbonate HUCs", 
                                    "ogr")
+    p_karst_layer.setOpacity(0.5)
     project.addMapLayer(p_karst_layer, False)
-    """
+    
 
     karst_group = root.addGroup("USGS Karst Map")
     karst_layer = QgsVectorLayer(
-        "../USGS-Karst-Map/Carbonates48.shp", "Carbonates 48", "ogr"
+        os.path.join(karst_dir, "Carbonates48.shp"), "Carbonates 48", "ogr"
     )
     project.addMapLayer(karst_layer, False)
     rock_type = karst_layer.fields().lookupField("ROCKTYPE1")
@@ -104,6 +135,14 @@ def create_project(sinks_tag="Combined"):
     karst_group.addLayer(karst_layer)
     karst_group.setExpanded(False)
 
+
+    states_layer = QgsVectorLayer(os.path.join(misc_dir, "cb_2018_us_state_500k.shp"), 
+                                   "US States", 
+                                   "ogr")
+    states_layer.setOpacity(0.5)
+    project.addMapLayer(states_layer, False)
+    
+
     dem_group = root.addGroup("Hillshade")
     url_with_params = "contextualWMSLegend=0&crs=EPSG:4326&dpiMode=7&featureCount=10&format=image/tiff&layers=3DEPElevation:Hillshade%20Gray&styles&url=https://elevation.nationalmap.gov/arcgis/services/3DEPElevation/ImageServer/WMSServer"
     WMSLayer = QgsRasterLayer(url_with_params, "3DEP Hillshade", "wms")
@@ -119,14 +158,44 @@ def create_project(sinks_tag="Combined"):
                 n.setExpanded(False)
                 print(f"Layer group '{n.name()}' now collapsed.")
 
-    project.write("./carb_huc_dems/Sink-catchments-" + sinks_tag + ".qgs")
+    project.write("./carb_huc_dems/US-Karstification-" + sinks_tag + ".qgs")
 
     qgs.exitQgis()
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        sinks = sys.argv[1]
-        create_project(sinks_tag=sinks)
-    else:
-        create_project()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-s",
+        "--sinks",
+        help="Which sinks shapefile to use (default=Combined).",
+        choices=["USGS", "Mihevc", "Combined"],
+        default="Combined",
+    )
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="If flag is set, then existing QGIS project files will be overwritten.",
+    )
+
+    parser.add_argument(
+        "-d",
+        "--dir",
+        help="Name of directory containing dems.",
+        default="./carb_huc_dems",
+    )
+    parser.add_argument(
+        "-o",
+        "--outdir",
+        help="Name of directory to create QGIS project.",
+        default="./share",
+    )
+    args = parser.parse_args()
+    sinks = args.sinks
+    overwrite = args.overwrite
+    dem_dir = args.dir
+    out_dir = args.outdir
+
+    create_project(
+        sinks_tag=sinks, overwrite=overwrite, dem_dir=dem_dir, out_dir=out_dir
+    )
