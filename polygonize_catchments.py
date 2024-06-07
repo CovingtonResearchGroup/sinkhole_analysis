@@ -61,7 +61,7 @@ if __name__ == "__main__":
         "-d",
         "--dir",
         help="Directory containing catchment tifs.",
-        default="./carb_huc_dems/catchments",
+        default="./carb_huc_dems",  # changed to location where these files original save, but this was not yet tested.
     )
     args = parser.parse_args()
     n_processes = int(args.ncpus)
