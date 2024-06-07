@@ -160,7 +160,7 @@ def create_project(sinks_tag="Combined", out_dir=None, dem_dir=None, overwrite=F
                 n.setExpanded(False)
                 print(f"Layer group '{n.name()}' now collapsed.")
 
-    project.write("./carb_huc_dems/US-Karstification-" + sinks_tag + ".qgs")
+    project.write(os.path.join(out_dir, "US-Karstification-" + sinks_tag + ".qgs"))
 
     qgs.exitQgis()
 
