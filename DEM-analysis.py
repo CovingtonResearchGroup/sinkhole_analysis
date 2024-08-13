@@ -12,7 +12,7 @@ dem_tifs = glob.glob(os.path.join(dem_dir, "*3DEP.tif"))
 
 slope_dict = []
 for tif in dem_tifs:
-    huc_str = os.path.split(tif).split("-")[0]
+    huc_str = os.path.split(tif)[-1].split("-")[0]
     print("Processing " + huc_str)
     dem = rd.LoadGDAL(tif)
     slope = rd.TerrainAttribute(dem, attrib="slope_riserun")
