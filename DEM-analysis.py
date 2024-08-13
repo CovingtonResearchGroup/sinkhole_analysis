@@ -21,7 +21,7 @@ def determine_median_slope(tif):
     # slope_dict[huc_str] = np.median(slope[~np.isnan(slope)]).tolist()
 
 
-with Pool(30) as p:
+with Pool(30, maxtasksperchild=5) as p:
     huc_slope_list = p.map(determine_median_slope, dem_tifs)
 
 slope_dict = {}
