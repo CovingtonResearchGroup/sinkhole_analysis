@@ -6,8 +6,8 @@ import pandas as pd
 import pickle
 from multiprocessing import Pool
 
-# dem_dir = "./carb_huc_dems/"  # "./zero_p_test/"
-dem_dir = "./zero_p_test/"
+dem_dir = "./carb_huc_dems/"  # "./zero_p_test/"
+# dem_dir = "./zero_p_test/"
 
 dem_tifs = glob.glob(os.path.join(dem_dir, "*3DEP.tif"))
 
