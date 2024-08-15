@@ -64,7 +64,6 @@ if __name__ == '__main__':
     for param in raster_key.index:
         print("Processing " + param + "...")
         means_dict[param] = calc_raster_stats(param)
-        break
     
     means_df = pd.DataFrame(means_dict)
     p_karst_df_with_controls = p_karst_df.join(means_df)
@@ -79,20 +78,47 @@ if __name__ == '__main__':
     huc_rocks_list_flat = [x for xs in huc_rocks_list for x in xs]
     huc_rocks_df = pd.DataFrame(huc_rocks_list_flat)
     # Filter to only cases where one rock type fills more than half of the HUC
-    huc_rocks_df = huc_rocks_df[huc_rocks_df.percent_area > 0.5]
+    huc_rocks_df = huc_rocks_df[huc_rocks_df.percent_area > 0.1]
     
     #create boolean columns: True if a rocktype is a carbonate, False otherwise
     huc_rocks_df['rocktype1_is_carb'] = (huc_rocks_df['rocktype1'] == 'limestone') | (huc_rocks_df['rocktype1'] == 'dolostone (dolomite)') | (huc_rocks_df['rocktype1'] == 'carbonate') | (huc_rocks_df['rocktype1'] == 'calcarenite')
     huc_rocks_df['rocktype2_is_carb'] = (huc_rocks_df['rocktype2'] == 'limestone') | (huc_rocks_df['rocktype2'] == 'dolostone (dolomite)') | (huc_rocks_df['rocktype2'] == 'carbonate') | (huc_rocks_df['rocktype2'] == 'calcarenite')
     
     #convert from true/false to 1/0 for carb_index math. Otherwise behavior is unpredictable
-    huc_rocks_df["rocktype1_is_carb"] = huc_rocks_df["rocktype1_is_carb"].astype(int)
-    huc_rocks_df["rocktype2_is_carb"] = huc_rocks_df["rocktype2_is_carb"].astype(int)
+    huc_rocks_df["rocktype1_is_carb"] = huc_rocks_df["rocktype1_is_carb"].astype(float)
+    huc_rocks_df["rocktype2_is_carb"] = huc_rocks_df["rocktype2_is_carb"].astype(float)
     
     #calculate carbonate index: index = (rocktype1_is_carb + rocktype2_is_carb) / N_recorded_rock_types
-    huc_rocks_df['carb_index'] = (huc_rocks_df['rocktype1_is_carb'] + huc_rocks_df['rocktype2_is_carb']) / 2
+    huc_rocks_df['rocktype_carb_index'] = (huc_rocks_df['rocktype1_is_carb'] + huc_rocks_df['rocktype2_is_carb']) / 2
+    huc_rocks_df['huc_carb_index'] = 0.0
+    huc_rocks_df['huc_pct_area_represented_in_index'] = 0.0
+    print('Calculating carbonate index for each HUC...')
+    for huc12 in huc_rocks_df.huc12.unique():
+        #record the percent of HUC area that was used in the calculation
+        #(in other words, how much of the HUC is accounted for by rock units 
+        #above whatever area threshold we used)
+        huc_rocks_df.loc[huc_rocks_df['huc12'] == huc12, 'huc_pct_area_represented_in_index'] = np.sum(huc_rocks_df.loc[huc_rocks_df['huc12'] == huc12, 'percent_area'])
+        #calculate and store the area-weighted carbonate index
+        huc_rocks_df.loc[huc_rocks_df['huc12'] == huc12, 'huc_carb_index'] = np.sum(huc_rocks_df.loc[huc_rocks_df['huc12'] == huc12, 'rocktype_carb_index'] * huc_rocks_df.loc[huc_rocks_df['huc12'] == huc12, 'percent_area']) / huc_rocks_df.loc[huc_rocks_df['huc12'] == huc12, 'huc_pct_area_represented_in_index']
+        
+
+    #now create a decimated copy of huc_rocks_df so that there aren't duplicate hucs when we join with the climate/soils/pkarst info
+    huc_rocks_df_decimated = huc_rocks_df.drop_duplicates(subset = ['huc12'], keep = 'first')
+    #remove rocktype info because there are mulptiple rock types per huc;
+    #this can always be found in the non-decimated df but is misleading in the 
+    #decimated one because we deleted duplicate HUC lines which removed rock type info
+    huc_rocks_df_decimated = huc_rocks_df_decimated.drop(columns = ['rocktype1', 
+                                                                    'rocktype2', 
+                                                                    'percent_area', 
+                                                                    'induration', 
+                                                                    'exposure', 
+                                                                    'unit_name',
+                                                                    'unit_age',
+                                                                    'rocktype1_is_carb',
+                                                                    'rocktype2_is_carb',
+                                                                    'rocktype_carb_index'])
     
-    p_with_rocks = p_karst_df.merge(huc_rocks_df, on="huc12", how="left")
+    p_with_rocks = p_karst_df.merge(huc_rocks_df_decimated, on="huc12", how="left")
     
     # Join rocks dataframe with other controls
     different_cols = p_with_rocks.columns.difference(p_karst_df_with_controls.columns)
