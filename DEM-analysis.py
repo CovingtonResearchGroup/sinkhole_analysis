@@ -21,7 +21,11 @@ def determine_median_slope(tif):
     dem_no_nans = dem[~np.isnan(dem)]
     max_elev = dem_no_nans.max()
     min_elev = dem_no_nans.min()
-    return (huc_str, median_slope, max_elev, min_elev)
+    thresh_slope = np.tan(np.deg2rad(20))
+    n_high_slope = len(slope[slope >= thresh_slope])
+    n_low_slope = len(slope[slope < thresh_slope])
+    f_steep = n_high_slope / (n_high_slope + n_low_slope)
+    return (huc_str, median_slope, max_elev, min_elev, f_steep)
     # slope_dict[huc_str] = np.median(slope[~np.isnan(slope)]).tolist()
 
 
@@ -35,6 +39,7 @@ for huc in huc_slope_list:
     relief_dict["median_slope"] = huc[1]
     relief_dict["max_elev"] = huc[2]
     relief_dict["min_elev"] = huc[3]
+    relief_dict["f_steep"] = huc[4]
     relief_list.append(relief_dict)
 
 
