@@ -6,8 +6,8 @@ import pandas as pd
 import pickle
 from multiprocessing import Pool
 
-dem_dir = "./carb_huc_dems/"  # "./zero_p_test/"
-# dem_dir = "./zero_p_test/"
+# dem_dir = "./carb_huc_dems/"  # "./zero_p_test/"
+dem_dir = "./zero_p_test/"
 
 dem_tifs = glob.glob(os.path.join(dem_dir, "*3DEP.tif"))
 
@@ -32,9 +32,10 @@ def determine_median_slope(tif):
 with Pool(10, maxtasksperchild=5) as p:
     huc_slope_list = p.map(determine_median_slope, dem_tifs)
 
+print("huc_slope_list=", huc_slope_list)
 relief_list = []
-relief_dict = {}
 for huc in huc_slope_list:
+    relief_dict = {}
     relief_dict["huc12"] = huc[0]
     relief_dict["median_slope"] = huc[1]
     relief_dict["max_elev"] = huc[2]
