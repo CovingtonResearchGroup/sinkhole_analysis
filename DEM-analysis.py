@@ -6,8 +6,8 @@ import pandas as pd
 import pickle
 from multiprocessing import Pool
 
-# dem_dir = "./carb_huc_dems/"  # "./zero_p_test/"
-dem_dir = "./zero_p_test/"
+dem_dir = "./carb_huc_dems/"
+# dem_dir = "./zero_p_test/"
 
 dem_tifs = glob.glob(os.path.join(dem_dir, "*3DEP.tif"))
 
@@ -19,8 +19,8 @@ def determine_median_slope(tif):
     slope = rd.TerrainAttribute(dem, attrib="slope_riserun")
     median_slope = np.median(slope[~np.isnan(slope)]).tolist()
     dem_no_nans = dem[~np.isnan(dem)]
-    max_elev = dem_no_nans.max()
-    min_elev = dem_no_nans.min()
+    max_elev = dem_no_nans.max().tolist()
+    min_elev = dem_no_nans.min().tolist()
     thresh_slope = np.tan(np.deg2rad(20))
     n_high_slope = len(slope[slope >= thresh_slope])
     n_low_slope = len(slope[slope < thresh_slope])
