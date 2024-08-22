@@ -72,7 +72,7 @@ if __name__ == '__main__':
     karst = gpd.read_file("USGS-Karst-Map/Carbonates48.shp")
     karst = karst.to_crs("5070")
     
-    with Pool(os.cpu_count() - 2) as p:
+    with Pool(8) as p:
         huc_rocks_list = p.map(partial(get_rock_types, karst = karst), [row for i, row in p_karst_df.iterrows()])
     
     huc_rocks_list_flat = [x for xs in huc_rocks_list for x in xs]
